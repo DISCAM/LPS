@@ -1,0 +1,6 @@
+@LabelPrintingSystemApi_1._0_HostAddress = http://localhost:5022
+
+GET {{LabelPrintingSystemApi_1._0_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

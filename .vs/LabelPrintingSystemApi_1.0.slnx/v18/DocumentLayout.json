@@ -1,0 +1,205 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{AE8E2E54-CA0B-F6F5-0102-F79722AD1421}|Data\\Data.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\data\\urls.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE8E2E54-CA0B-F6F5-0102-F79722AD1421}|Data\\Data.csproj|solutionrelative:data\\urls.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\labelprintingsystemapi_1.0\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|solutionrelative:labelprintingsystemapi_1.0\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\labelprintingsystemapi_1.0\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|solutionrelative:labelprintingsystemapi_1.0\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\labelprintingsystemapi_1.0\\services\\interfaces\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|solutionrelative:labelprintingsystemapi_1.0\\services\\interfaces\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\labelprintingsystemapi_1.0\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|solutionrelative:labelprintingsystemapi_1.0\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\labelprintingsystemapi_1.0\\controllers\\basecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|solutionrelative:labelprintingsystemapi_1.0\\controllers\\basecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\labelprintingsystemapi_1.0\\models\\contexts\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A12903B1-9F95-27DB-96E7-C37EB5E0A930}|LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0.csproj|solutionrelative:labelprintingsystemapi_1.0\\models\\contexts\\databasecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE8E2E54-CA0B-F6F5-0102-F79722AD1421}|Data\\Data.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\data\\dtos\\user\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE8E2E54-CA0B-F6F5-0102-F79722AD1421}|Data\\Data.csproj|solutionrelative:data\\dtos\\user\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE8E2E54-CA0B-F6F5-0102-F79722AD1421}|Data\\Data.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\data\\dtos\\user\\usercreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE8E2E54-CA0B-F6F5-0102-F79722AD1421}|Data\\Data.csproj|solutionrelative:data\\dtos\\user\\usercreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE8E2E54-CA0B-F6F5-0102-F79722AD1421}|Data\\Data.csproj|d:\\projekt inz repo\\apilabelprintingsystem\\labelprintingsystemapi_1.0\\data\\dtos\\user\\usereditdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE8E2E54-CA0B-F6F5-0102-F79722AD1421}|Data\\Data.csproj|solutionrelative:data\\dtos\\user\\usereditdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 586,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 697,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "LabelPrintingSystemApi_1.0\\Controllers\\UserController.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Controllers\\UserController.cs",
+              "RelativeToolTip": "LabelPrintingSystemApi_1.0\\Controllers\\UserController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T14:52:53.641Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IUserService.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Services\\Interfaces\\IUserService.cs",
+              "RelativeDocumentMoniker": "LabelPrintingSystemApi_1.0\\Services\\Interfaces\\IUserService.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Services\\Interfaces\\IUserService.cs",
+              "RelativeToolTip": "LabelPrintingSystemApi_1.0\\Services\\Interfaces\\IUserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T16:36:52.875Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Program.cs",
+              "RelativeDocumentMoniker": "LabelPrintingSystemApi_1.0\\Program.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Program.cs",
+              "RelativeToolTip": "LabelPrintingSystemApi_1.0\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T15:33:21.668Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Urls.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\Data\\Urls.cs",
+              "RelativeDocumentMoniker": "Data\\Urls.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\Data\\Urls.cs",
+              "RelativeToolTip": "Data\\Urls.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T12:24:39.791Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BaseController.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Controllers\\BaseController.cs",
+              "RelativeDocumentMoniker": "LabelPrintingSystemApi_1.0\\Controllers\\BaseController.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Controllers\\BaseController.cs",
+              "RelativeToolTip": "LabelPrintingSystemApi_1.0\\Controllers\\BaseController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T14:54:52.237Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "DatabaseContext.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Models\\Contexts\\DatabaseContext.cs",
+              "RelativeDocumentMoniker": "LabelPrintingSystemApi_1.0\\Models\\Contexts\\DatabaseContext.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Models\\Contexts\\DatabaseContext.cs",
+              "RelativeToolTip": "LabelPrintingSystemApi_1.0\\Models\\Contexts\\DatabaseContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-09T10:01:34.698Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "UserDto.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\Data\\Dtos\\User\\UserDto.cs",
+              "RelativeDocumentMoniker": "Data\\Dtos\\User\\UserDto.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\Data\\Dtos\\User\\UserDto.cs",
+              "RelativeToolTip": "Data\\Dtos\\User\\UserDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T16:22:03.4Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "UserCreateDto.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\Data\\Dtos\\User\\UserCreateDto.cs",
+              "RelativeDocumentMoniker": "Data\\Dtos\\User\\UserCreateDto.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\Data\\Dtos\\User\\UserCreateDto.cs",
+              "RelativeToolTip": "Data\\Dtos\\User\\UserCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T15:25:36.909Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "UserEditDto.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\Data\\Dtos\\User\\UserEditDto.cs",
+              "RelativeDocumentMoniker": "Data\\Dtos\\User\\UserEditDto.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\Data\\Dtos\\User\\UserEditDto.cs",
+              "RelativeToolTip": "Data\\Dtos\\User\\UserEditDto.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAvwBkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T15:25:44.326Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 868,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Services\\UserService.cs",
+              "RelativeDocumentMoniker": "LabelPrintingSystemApi_1.0\\Services\\UserService.cs",
+              "ToolTip": "D:\\projekt inz repo\\APILabelPrintingSystem\\LabelPrintingSystemApi_1.0\\LabelPrintingSystemApi_1.0\\Services\\UserService.cs",
+              "RelativeToolTip": "LabelPrintingSystemApi_1.0\\Services\\UserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T16:36:08.976Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Data/Data.csproj" />
+  <Project Path="LabelPrintingSystemApi_1.0/LabelPrintingSystemApi_1.0.csproj" />
+</Solution>
