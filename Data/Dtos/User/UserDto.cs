@@ -13,13 +13,20 @@ namespace Data.Dtos.User
     {
         [JsonPropertyName("id")]
         required public int UserId { get; set; }
-        
+
+
+        [Required]
+        [MaxLength(100)]
         [JsonPropertyName("login")]
         required public string Login { get; set; } = null!;
 
+        [Required]
+        [MaxLength(150)]
         [JsonPropertyName("fullName")]
         required public string FullName { get; set; } = null!;
 
+        [Required]
+        [MaxLength(50)]
         [JsonPropertyName("roleName")]
         required public string RoleName { get; set; } = null!;
 

@@ -1,18 +1,8 @@
 [
   {
     "ContainingType": "LabelPrintingSystemApi_1._0.Controllers.UserController",
-    "Method": "GetAllUsersAsync",
-    "RelativePath": "users",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "LabelPrintingSystemApi_1._0.Controllers.UserController",
     "Method": "CreateUserAsync",
-    "RelativePath": "users",
+    "RelativePath": "user",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -28,7 +18,7 @@
   {
     "ContainingType": "LabelPrintingSystemApi_1._0.Controllers.UserController",
     "Method": "GetUserByIdAsync",
-    "RelativePath": "users/{id}",
+    "RelativePath": "user/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -44,7 +34,7 @@
   {
     "ContainingType": "LabelPrintingSystemApi_1._0.Controllers.UserController",
     "Method": "EditUserAsync",
-    "RelativePath": "users/{id}",
+    "RelativePath": "user/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -65,7 +55,7 @@
   {
     "ContainingType": "LabelPrintingSystemApi_1._0.Controllers.UserController",
     "Method": "DeleteCustomerAsync",
-    "RelativePath": "users/{id}",
+    "RelativePath": "user/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -76,6 +66,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "LabelPrintingSystemApi_1._0.Controllers.UserController",
+    "Method": "GetAllUsersAsync",
+    "RelativePath": "users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

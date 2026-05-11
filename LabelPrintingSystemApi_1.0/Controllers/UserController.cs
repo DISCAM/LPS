@@ -26,7 +26,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
         }
         
         [HttpGet]
-        [Route(Urls.USERS_ID)]
+        [Route(Urls.USER_ID)]
         public async Task<IActionResult> GetUserByIdAsync(int id)
         {
             UserDto dto = await service.GetUserByIdAsync(id);
@@ -34,7 +34,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
         }
 
         [HttpPost]
-        [Route(Urls.USERS)]
+        [Route(Urls.USER)]
         public async Task<IActionResult> CreateUserAsync([FromBody] UserCreateDto dto)
         {
             await service.CreateUserAsync(dto);
@@ -43,7 +43,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
         }
 
         [HttpPut]
-        [Route(Urls.USERS_ID)]
+        [Route(Urls.USER_ID)]
         public async Task<IActionResult> EditUserAsync([FromBody] UserEditDto dto, int id)
         {
             if (id != dto.UserId)
@@ -55,7 +55,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
 
         }
         [HttpDelete]
-        [Route(Urls.USERS_ID)]
+        [Route(Urls.USER_ID)]
         public async Task<IActionResult> DeleteCustomerAsync(int id)
         {
             await service.DeleteCustomerAsync(id);

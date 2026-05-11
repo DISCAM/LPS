@@ -9,3 +9,4 @@ D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\Data\obj\D
 D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\Data\obj\Debug\net10.0\refint\Data.dll
 D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\Data\obj\Debug\net10.0\Data.pdb
 D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\Data\obj\Debug\net10.0\ref\Data.dll
+D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\Data\obj\Debug\net10.0\Data.sourcelink.json

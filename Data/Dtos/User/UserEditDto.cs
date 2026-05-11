@@ -19,7 +19,5 @@ namespace Data.Dtos.User
         [JsonPropertyName("roleId")]
         required public int RoleId { get; set; }
 
-        
-
     }
 }
