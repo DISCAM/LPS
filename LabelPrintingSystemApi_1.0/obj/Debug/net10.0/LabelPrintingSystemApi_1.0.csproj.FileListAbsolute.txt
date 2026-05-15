@@ -162,3 +162,7 @@ D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\LabelPrint
 D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\LabelPrintingSystemApi_1.0\obj\Debug\net10.0\LabelPrintingSystemApi_1.0.MvcApplicationPartsAssemblyInfo.cs
 D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\LabelPrintingSystemApi_1.0\obj\Debug\net10.0\LabelPrintingSystemApi_1.0.sourcelink.json
 D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\LabelPrintingSystemApi_1.0\bin\Debug\net10.0\AutoMapper.dll
+D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\LabelPrintingSystemApi_1.0\bin\Debug\net10.0\nlog.config
+D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\LabelPrintingSystemApi_1.0\bin\Debug\net10.0\NLog.dll
+D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\LabelPrintingSystemApi_1.0\bin\Debug\net10.0\NLog.Extensions.Logging.dll
+D:\projekt inz repo\APILabelPrintingSystem\LabelPrintingSystemApi_1.0\LabelPrintingSystemApi_1.0\bin\Debug\net10.0\NLog.Web.AspNetCore.dll

@@ -205,9 +205,11 @@
         "type": "object",
         "properties": {
           "login": {
+            "maxLength": 100,
             "type": "string"
           },
           "fullName": {
+            "maxLength": 150,
             "type": "string"
           },
           "roleId": {

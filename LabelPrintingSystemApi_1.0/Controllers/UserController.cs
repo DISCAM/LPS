@@ -1,7 +1,5 @@
 ﻿using Data;
 using Data.Dtos.User;
-using LabelPrintingSystemApi_1._0.Models;
-using LabelPrintingSystemApi_1._0.Models.Contexts;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +9,12 @@ namespace LabelPrintingSystemApi_1._0.Controllers
     public class UserController : BaseController
     {
         private readonly IUserService service;  // pole klasy
+        private readonly ILogger<UserController> logger;
 
-        public UserController(IUserService service)
+        public UserController(IUserService service, ILogger<UserController> logger)
         {
             this.service = service;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -37,6 +37,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
         [Route(Urls.USER)]
         public async Task<IActionResult> CreateUserAsync([FromBody] UserCreateDto dto)
         {
+            
             await service.CreateUserAsync(dto);
             return Ok();
 
@@ -46,11 +47,12 @@ namespace LabelPrintingSystemApi_1._0.Controllers
         [Route(Urls.USER_ID)]
         public async Task<IActionResult> EditUserAsync([FromBody] UserEditDto dto, int id)
         {
-            if (id != dto.UserId)
-            {
-                return BadRequest("ID mismatch");
-            }
-            await service.EditUserAsync(dto);
+            // przenosimy to sprawdzanie do exceptions  
+            //if (id != dto.UserId)
+            //{
+            //    return BadRequest("ID mismatch");
+            //}
+            await service.EditUserAsync(id, dto);
             return Ok();
 
         }

@@ -19,6 +19,13 @@ namespace LabelPrintingSystemApi_1._0.MappingProfiles
 
             /// edycja
             CreateMap<UserEditDto, User>(); 
+
+
+
+
+
+
+
         }
     }
 }

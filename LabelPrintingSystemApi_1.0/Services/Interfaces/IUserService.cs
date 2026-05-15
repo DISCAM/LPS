@@ -6,7 +6,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Interfaces
     {
         Task CreateUserAsync(UserCreateDto dto);
         Task DeleteCustomerAsync(int id);
-        Task EditUserAsync(UserEditDto dto);
+        Task EditUserAsync(int id, UserEditDto dto);
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
         Task<UserDto> GetUserByIdAsync(int id);
     }
