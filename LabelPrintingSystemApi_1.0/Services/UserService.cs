@@ -87,7 +87,7 @@ namespace LabelPrintingSystemApi_1._0.Services
 
             user.IsActive = true;
             user.CreatedAt = DateTime.Now;
-            user.PasswordHash = "$$%%**#";
+           
 
             databaseContext.Users.Add(user);
             await databaseContext.SaveChangesAsync();
@@ -141,7 +141,7 @@ namespace LabelPrintingSystemApi_1._0.Services
             //kto zmodyfikował usuwał 
             await databaseContext.SaveChangesAsync();
 
-            logger.LogError($"|{user.Login}| User został usunięty przez");
+            logger.LogError($"|{user.FullName}| User został usunięty przez");
 
         }
 

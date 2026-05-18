@@ -18,6 +18,12 @@ public partial class RolePermission
     [Precision(0)]
     public DateTime CreatedAt { get; set; }
 
+    public int? CreatedByUserId { get; set; }
+
+    [ForeignKey("CreatedByUserId")]
+    [InverseProperty("RolePermissions")]
+    public virtual User? CreatedByUser { get; set; }
+
     [ForeignKey("PermissionId")]
     [InverseProperty("RolePermissions")]
     public virtual Permission Permission { get; set; } = null!;

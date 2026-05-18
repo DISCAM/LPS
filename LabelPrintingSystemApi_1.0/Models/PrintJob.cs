@@ -15,7 +15,7 @@ public partial class PrintJob
 
     public int PrinterId { get; set; }
 
-    public int RequestedByUserId { get; set; }
+    public int CreatedByUserId { get; set; }
 
     public int? ScanEventId { get; set; }
 
@@ -31,11 +31,24 @@ public partial class PrintJob
     public string? ErrorMessage { get; set; }
 
     [Precision(0)]
-    public DateTime RequestedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public int? ModifiedByUserId { get; set; }
+
+    [Precision(0)]
+    public DateTime? ModifiedAt { get; set; }
+
+    [ForeignKey("CreatedByUserId")]
+    [InverseProperty("PrintJobCreatedByUsers")]
+    public virtual User CreatedByUser { get; set; } = null!;
 
     [ForeignKey("LabelId")]
     [InverseProperty("PrintJobs")]
     public virtual Label Label { get; set; } = null!;
+
+    [ForeignKey("ModifiedByUserId")]
+    [InverseProperty("PrintJobModifiedByUsers")]
+    public virtual User? ModifiedByUser { get; set; }
 
     [InverseProperty("PrintJob")]
     public virtual ICollection<PrintJobHistory> PrintJobHistories { get; set; } = new List<PrintJobHistory>();
@@ -46,10 +59,6 @@ public partial class PrintJob
 
     [InverseProperty("PrintJob")]
     public virtual ICollection<ReprintRequest> ReprintRequests { get; set; } = new List<ReprintRequest>();
-
-    [ForeignKey("RequestedByUserId")]
-    [InverseProperty("PrintJobs")]
-    public virtual User RequestedByUser { get; set; } = null!;
 
     [ForeignKey("ScanEventId")]
     [InverseProperty("PrintJobs")]

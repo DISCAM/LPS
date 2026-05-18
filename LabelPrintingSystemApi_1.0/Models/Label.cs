@@ -55,7 +55,7 @@ public partial class Label
 
     [ForeignKey("ProductionLotId")]
     [InverseProperty("Labels")]
-    public virtual ProductionUnit? ProductionLot { get; set; }
+    public virtual ProductionLot? ProductionLot { get; set; }
 
     [InverseProperty("SourceLabel")]
     public virtual ICollection<ScanEvent> ScanEvents { get; set; } = new List<ScanEvent>();

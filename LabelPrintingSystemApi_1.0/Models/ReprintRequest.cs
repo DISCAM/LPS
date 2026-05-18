@@ -13,19 +13,32 @@ public partial class ReprintRequest
 
     public int PrintJobId { get; set; }
 
-    public int RequestedByUserId { get; set; }
+    public int CreatedByUserId { get; set; }
 
     [StringLength(255)]
     public string? Reason { get; set; }
 
     [Precision(0)]
-    public DateTime RequestedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    [StringLength(20)]
+    [Unicode(false)]
+    public string Status { get; set; } = null!;
+
+    public int? ModifiedByUserId { get; set; }
+
+    [Precision(0)]
+    public DateTime? ModifiedAt { get; set; }
+
+    [ForeignKey("CreatedByUserId")]
+    [InverseProperty("ReprintRequestCreatedByUsers")]
+    public virtual User CreatedByUser { get; set; } = null!;
+
+    [ForeignKey("ModifiedByUserId")]
+    [InverseProperty("ReprintRequestModifiedByUsers")]
+    public virtual User? ModifiedByUser { get; set; }
 
     [ForeignKey("PrintJobId")]
     [InverseProperty("ReprintRequests")]
     public virtual PrintJob PrintJob { get; set; } = null!;
-
-    [ForeignKey("RequestedByUserId")]
-    [InverseProperty("ReprintRequests")]
-    public virtual User RequestedByUser { get; set; } = null!;
 }

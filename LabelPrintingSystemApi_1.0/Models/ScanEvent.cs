@@ -11,7 +11,7 @@ public partial class ScanEvent
     [Key]
     public int ScanEventId { get; set; }
 
-    public int UserId { get; set; }
+    public int CreatedByUserId { get; set; }
 
     public int? SourceLabelId { get; set; }
 
@@ -27,26 +27,26 @@ public partial class ScanEvent
     [Unicode(false)]
     public string ResultStatus { get; set; } = null!;
 
-    public int? ProductionUnitId { get; set; }
+    public int? ProductionLotId { get; set; }
 
     [StringLength(255)]
     public string? Notes { get; set; }
 
     [Precision(0)]
-    public DateTime ScannedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    [ForeignKey("CreatedByUserId")]
+    [InverseProperty("ScanEvents")]
+    public virtual User CreatedByUser { get; set; } = null!;
 
     [InverseProperty("ScanEvent")]
     public virtual ICollection<PrintJob> PrintJobs { get; set; } = new List<PrintJob>();
 
-    [ForeignKey("ProductionUnitId")]
+    [ForeignKey("ProductionLotId")]
     [InverseProperty("ScanEvents")]
-    public virtual ProductionUnit? ProductionUnit { get; set; }
+    public virtual ProductionLot? ProductionLot { get; set; }
 
     [ForeignKey("SourceLabelId")]
     [InverseProperty("ScanEvents")]
     public virtual Label? SourceLabel { get; set; }
-
-    [ForeignKey("UserId")]
-    [InverseProperty("ScanEvents")]
-    public virtual User User { get; set; } = null!;
 }

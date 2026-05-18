@@ -11,7 +11,7 @@ public partial class AuditLog
     [Key]
     public int AuditLogId { get; set; }
 
-    public int? UserId { get; set; }
+    public int? CreatedByUserId { get; set; }
 
     [StringLength(100)]
     public string EntityName { get; set; } = null!;
@@ -26,7 +26,7 @@ public partial class AuditLog
     [Precision(0)]
     public DateTime CreatedAt { get; set; }
 
-    [ForeignKey("UserId")]
+    [ForeignKey("CreatedByUserId")]
     [InverseProperty("AuditLogs")]
-    public virtual User? User { get; set; }
+    public virtual User? CreatedByUser { get; set; }
 }

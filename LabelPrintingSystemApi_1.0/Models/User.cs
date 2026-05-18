@@ -6,17 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LabelPrintingSystemApi_1._0.Models;
 
-[Index("Login", Name = "UQ_Users_Login", IsUnique = true)]
 public partial class User
 {
     [Key]
     public int UserId { get; set; }
-
-    [StringLength(100)]
-    public string Login { get; set; } = null!;
-
-    [StringLength(255)]
-    public string PasswordHash { get; set; } = null!;
 
     [StringLength(150)]
     public string FullName { get; set; } = null!;
@@ -31,8 +24,30 @@ public partial class User
     [Precision(0)]
     public DateTime? ModifiedAt { get; set; }
 
-    [InverseProperty("User")]
+    public int? CreatedByUserId { get; set; }
+
+    public int? ModifiedByUserId { get; set; }
+
+    public string? IdentityUserId { get; set; }
+
+    [InverseProperty("CreatedByUser")]
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+
+    [ForeignKey("CreatedByUserId")]
+    [InverseProperty("InverseCreatedByUser")]
+    public virtual User? CreatedByUser { get; set; }
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<Customer> CustomerCreatedByUsers { get; set; } = new List<Customer>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<Customer> CustomerModifiedByUsers { get; set; } = new List<Customer>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<User> InverseCreatedByUser { get; set; } = new List<User>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<User> InverseModifiedByUser { get; set; } = new List<User>();
 
     [InverseProperty("CreatedByUser")]
     public virtual ICollection<LabelTemplate> LabelTemplateCreatedByUsers { get; set; } = new List<LabelTemplate>();
@@ -44,21 +59,85 @@ public partial class User
     public virtual ICollection<Label> Labels { get; set; } = new List<Label>();
 
     [InverseProperty("CreatedByUser")]
-    public virtual ICollection<LogisticUnit> LogisticUnits { get; set; } = new List<LogisticUnit>();
-
-    [InverseProperty("RequestedByUser")]
-    public virtual ICollection<PrintJob> PrintJobs { get; set; } = new List<PrintJob>();
+    public virtual ICollection<LogisticUnit> LogisticUnitCreatedByUsers { get; set; } = new List<LogisticUnit>();
 
     [InverseProperty("CreatedByUser")]
-    public virtual ICollection<ProductionUnit> ProductionUnits { get; set; } = new List<ProductionUnit>();
+    public virtual ICollection<LogisticUnitItem> LogisticUnitItemCreatedByUsers { get; set; } = new List<LogisticUnitItem>();
 
-    [InverseProperty("RequestedByUser")]
-    public virtual ICollection<ReprintRequest> ReprintRequests { get; set; } = new List<ReprintRequest>();
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<LogisticUnitItem> LogisticUnitItemModifiedByUsers { get; set; } = new List<LogisticUnitItem>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<LogisticUnit> LogisticUnitModifiedByUsers { get; set; } = new List<LogisticUnit>();
+
+    [ForeignKey("ModifiedByUserId")]
+    [InverseProperty("InverseModifiedByUser")]
+    public virtual User? ModifiedByUser { get; set; }
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<Permission> PermissionCreatedByUsers { get; set; } = new List<Permission>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<Permission> PermissionModifiedByUsers { get; set; } = new List<Permission>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<PrintJob> PrintJobCreatedByUsers { get; set; } = new List<PrintJob>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<PrintJob> PrintJobModifiedByUsers { get; set; } = new List<PrintJob>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<Printer> PrinterCreatedByUsers { get; set; } = new List<Printer>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<Printer> PrinterModifiedByUsers { get; set; } = new List<Printer>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<ProductionLot> ProductionLotCreatedByUsers { get; set; } = new List<ProductionLot>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<ProductionLot> ProductionLotModifiedByUsers { get; set; } = new List<ProductionLot>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<ProductionOrder> ProductionOrderCreatedByUsers { get; set; } = new List<ProductionOrder>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<ProductionOrder> ProductionOrderModifiedByUsers { get; set; } = new List<ProductionOrder>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<ReprintRequest> ReprintRequestCreatedByUsers { get; set; } = new List<ReprintRequest>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<ReprintRequest> ReprintRequestModifiedByUsers { get; set; } = new List<ReprintRequest>();
 
     [ForeignKey("RoleId")]
     [InverseProperty("Users")]
     public virtual Role Role { get; set; } = null!;
 
-    [InverseProperty("User")]
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<Role> RoleCreatedByUsers { get; set; } = new List<Role>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<Role> RoleModifiedByUsers { get; set; } = new List<Role>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+
+    [InverseProperty("CreatedByUser")]
     public virtual ICollection<ScanEvent> ScanEvents { get; set; } = new List<ScanEvent>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<WarehouseOrder> WarehouseOrderCreatedByUsers { get; set; } = new List<WarehouseOrder>();
+
+    [InverseProperty("CreatedByUser")]
+    public virtual ICollection<WarehouseOrderItem> WarehouseOrderItemCreatedByUsers { get; set; } = new List<WarehouseOrderItem>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<WarehouseOrderItem> WarehouseOrderItemModifiedByUsers { get; set; } = new List<WarehouseOrderItem>();
+
+    [InverseProperty("ModifiedByUser")]
+    public virtual ICollection<WarehouseOrder> WarehouseOrderModifiedByUsers { get; set; } = new List<WarehouseOrder>();
 }

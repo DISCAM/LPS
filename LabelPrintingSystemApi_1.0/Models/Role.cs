@@ -23,6 +23,21 @@ public partial class Role
     [Precision(0)]
     public DateTime CreatedAt { get; set; }
 
+    public int? CreatedByUserId { get; set; }
+
+    public int? ModifiedByUserId { get; set; }
+
+    [Precision(0)]
+    public DateTime? ModifiedAt { get; set; }
+
+    [ForeignKey("CreatedByUserId")]
+    [InverseProperty("RoleCreatedByUsers")]
+    public virtual User? CreatedByUser { get; set; }
+
+    [ForeignKey("ModifiedByUserId")]
+    [InverseProperty("RoleModifiedByUsers")]
+    public virtual User? ModifiedByUser { get; set; }
+
     [InverseProperty("Role")]
     public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LabelPrintingSystemApi_1._0.Models;
 
-[Index("Code", Name = "UQ_Permission_Code", IsUnique = true)]
+[Index("Code", Name = "UQ_Permissions_Code", IsUnique = true)]
 public partial class Permission
 {
     [Key]
@@ -23,6 +23,23 @@ public partial class Permission
 
     [Precision(0)]
     public DateTime CreatedAt { get; set; }
+
+    public bool IsActive { get; set; }
+
+    public int? CreatedByUserId { get; set; }
+
+    public int? ModifiedByUserId { get; set; }
+
+    [Precision(0)]
+    public DateTime? ModifiedAt { get; set; }
+
+    [ForeignKey("CreatedByUserId")]
+    [InverseProperty("PermissionCreatedByUsers")]
+    public virtual User? CreatedByUser { get; set; }
+
+    [ForeignKey("ModifiedByUserId")]
+    [InverseProperty("PermissionModifiedByUsers")]
+    public virtual User? ModifiedByUser { get; set; }
 
     [InverseProperty("Permission")]
     public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();

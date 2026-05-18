@@ -38,6 +38,18 @@ public partial class Printer
     [Precision(0)]
     public DateTime? ModifiedAt { get; set; }
 
+    public int? CreatedByUserId { get; set; }
+
+    public int? ModifiedByUserId { get; set; }
+
+    [ForeignKey("CreatedByUserId")]
+    [InverseProperty("PrinterCreatedByUsers")]
+    public virtual User? CreatedByUser { get; set; }
+
+    [ForeignKey("ModifiedByUserId")]
+    [InverseProperty("PrinterModifiedByUsers")]
+    public virtual User? ModifiedByUser { get; set; }
+
     [InverseProperty("Printer")]
     public virtual ICollection<PrintJob> PrintJobs { get; set; } = new List<PrintJob>();
 }

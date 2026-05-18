@@ -21,11 +21,6 @@ public partial class LogisticUnit
     [Unicode(false)]
     public string UnitType { get; set; } = null!;
 
-    public int ProductionLotId { get; set; }
-
-    [Column(TypeName = "decimal(18, 3)")]
-    public decimal? Quantity { get; set; }
-
     [StringLength(20)]
     [Unicode(false)]
     public string Status { get; set; } = null!;
@@ -35,14 +30,31 @@ public partial class LogisticUnit
     [Precision(0)]
     public DateTime CreatedAt { get; set; }
 
+    public int? ModifiedByUserId { get; set; }
+
+    [Precision(0)]
+    public DateTime? ModifiedAt { get; set; }
+
+    public int? WarehouseOrderId { get; set; }
+
     [ForeignKey("CreatedByUserId")]
-    [InverseProperty("LogisticUnits")]
+    [InverseProperty("LogisticUnitCreatedByUsers")]
     public virtual User CreatedByUser { get; set; } = null!;
 
     [InverseProperty("LogisticUnit")]
     public virtual ICollection<Label> Labels { get; set; } = new List<Label>();
 
-    [ForeignKey("ProductionLotId")]
+    [InverseProperty("LogisticUnit")]
+    public virtual ICollection<LogisticUnitItem> LogisticUnitItems { get; set; } = new List<LogisticUnitItem>();
+
+    [ForeignKey("ModifiedByUserId")]
+    [InverseProperty("LogisticUnitModifiedByUsers")]
+    public virtual User? ModifiedByUser { get; set; }
+
+    [InverseProperty("LogisticUnit")]
+    public virtual ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
+
+    [ForeignKey("WarehouseOrderId")]
     [InverseProperty("LogisticUnits")]
-    public virtual ProductionUnit ProductionLot { get; set; } = null!;
+    public virtual WarehouseOrder? WarehouseOrder { get; set; }
 }

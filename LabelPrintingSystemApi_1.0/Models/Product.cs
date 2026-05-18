@@ -44,5 +44,8 @@ public partial class Product
     public virtual ICollection<Label> Labels { get; set; } = new List<Label>();
 
     [InverseProperty("Product")]
-    public virtual ICollection<ProductionUnit> ProductionUnits { get; set; } = new List<ProductionUnit>();
+    public virtual ICollection<ProductionOrder> ProductionOrders { get; set; } = new List<ProductionOrder>();
+
+    [InverseProperty("Product")]
+    public virtual ICollection<WarehouseOrderItem> WarehouseOrderItems { get; set; } = new List<WarehouseOrderItem>();
 }
