@@ -40,8 +40,6 @@ public partial class DatabaseContext : DbContext
 
     public virtual DbSet<ReprintRequest> ReprintRequests { get; set; }
 
-    public virtual DbSet<Role> Roles { get; set; }
-
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
     public virtual DbSet<ScanEvent> ScanEvents { get; set; }
@@ -281,20 +279,10 @@ public partial class DatabaseContext : DbContext
                 .HasConstraintName("FK_ReprintRequests_PrintJobs");
         });
 
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1ADC8ACDEA");
-
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Roles_CreatedAt");
-            entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_Roles_IsActive");
-
-            entity.HasOne(d => d.CreatedByUser).WithMany(p => p.RoleCreatedByUsers).HasConstraintName("FK_Roles_CreatedByUser");
-
-            entity.HasOne(d => d.ModifiedByUser).WithMany(p => p.RoleModifiedByUsers).HasConstraintName("FK_Roles_ModifiedByUser");
-        });
-
         modelBuilder.Entity<RolePermission>(entity =>
         {
+            entity.HasKey(e => new { e.RoleId, e.PermissionId }).IsClustered(false);
+
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_RolePermissions_CreatedAt");
 
             entity.HasOne(d => d.CreatedByUser).WithMany(p => p.RolePermissions).HasConstraintName("FK_RolePermissions_CreatedByUser");
@@ -302,10 +290,6 @@ public partial class DatabaseContext : DbContext
             entity.HasOne(d => d.Permission).WithMany(p => p.RolePermissions)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_RolePermissions_Permissions");
-
-            entity.HasOne(d => d.Role).WithMany(p => p.RolePermissions)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_RolePermissions_Roles");
         });
 
         modelBuilder.Entity<ScanEvent>(entity =>
@@ -356,10 +340,6 @@ public partial class DatabaseContext : DbContext
             entity.HasOne(d => d.CreatedByUser).WithMany(p => p.InverseCreatedByUser).HasConstraintName("FK_Users_CreatedByUser");
 
             entity.HasOne(d => d.ModifiedByUser).WithMany(p => p.InverseModifiedByUser).HasConstraintName("FK_Users_ModifiedByUser");
-
-            entity.HasOne(d => d.Role).WithMany(p => p.Users)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Users_Roles");
         });
 
         modelBuilder.Entity<WarehouseOrder>(entity =>

@@ -14,8 +14,6 @@ public partial class User
     [StringLength(150)]
     public string FullName { get; set; } = null!;
 
-    public int RoleId { get; set; }
-
     public bool IsActive { get; set; }
 
     [Precision(0)]
@@ -109,16 +107,6 @@ public partial class User
 
     [InverseProperty("ModifiedByUser")]
     public virtual ICollection<ReprintRequest> ReprintRequestModifiedByUsers { get; set; } = new List<ReprintRequest>();
-
-    [ForeignKey("RoleId")]
-    [InverseProperty("Users")]
-    public virtual Role Role { get; set; } = null!;
-
-    [InverseProperty("CreatedByUser")]
-    public virtual ICollection<Role> RoleCreatedByUsers { get; set; } = new List<Role>();
-
-    [InverseProperty("ModifiedByUser")]
-    public virtual ICollection<Role> RoleModifiedByUsers { get; set; } = new List<Role>();
 
     [InverseProperty("CreatedByUser")]
     public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();

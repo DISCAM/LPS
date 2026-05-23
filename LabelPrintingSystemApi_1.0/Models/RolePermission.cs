@@ -10,15 +10,15 @@ namespace LabelPrintingSystemApi_1._0.Models;
 public partial class RolePermission
 {
     [Key]
-    public int RoleId { get; set; }
-
-    [Key]
     public int PermissionId { get; set; }
 
     [Precision(0)]
     public DateTime CreatedAt { get; set; }
 
     public int? CreatedByUserId { get; set; }
+
+    [Key]
+    public string RoleId { get; set; } = null!;
 
     [ForeignKey("CreatedByUserId")]
     [InverseProperty("RolePermissions")]
@@ -27,8 +27,4 @@ public partial class RolePermission
     [ForeignKey("PermissionId")]
     [InverseProperty("RolePermissions")]
     public virtual Permission Permission { get; set; } = null!;
-
-    [ForeignKey("RoleId")]
-    [InverseProperty("RolePermissions")]
-    public virtual Role Role { get; set; } = null!;
 }
