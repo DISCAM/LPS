@@ -12,28 +12,24 @@ namespace Data.Dtos.User
     public class UserDto
     {
         [JsonPropertyName("id")]
-        required public int UserId { get; set; }
+        public int UserId { get; set; }
 
+        [JsonPropertyName("identityUserId")]
+        public string? IdentityUserId { get; set; }
 
-        [Required]
-        [MaxLength(100)]
-        [JsonPropertyName("login")]
-        required public string Login { get; set; } = null!;
+        [JsonPropertyName("email")]
+        public string? Email { get; set; }
 
-        [Required]
-        [MaxLength(150)]
         [JsonPropertyName("fullName")]
-        required public string FullName { get; set; } = null!;
+        public string FullName { get; set; } = null!;
 
-        [Required]
-        [MaxLength(50)]
         [JsonPropertyName("roleName")]
-        required public string RoleName { get; set; } = null!;
+        public string RoleName { get; set; } = string.Empty;
 
         [JsonPropertyName("createdAt")]
-        required public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [JsonPropertyName("modifiedAt")]
-        required public DateTime? ModifiedAt { get; set; }
+        public DateTime? ModifiedAt { get; set; }
     }
 }

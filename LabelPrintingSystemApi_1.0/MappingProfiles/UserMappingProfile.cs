@@ -11,14 +11,16 @@ namespace LabelPrintingSystemApi_1._0.MappingProfiles
 
             //// wyswietlanie wszystekich 
             ///  wyświtlanie jednego  
-            CreateMap<User, UserDto>()    
-                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.Name));
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.Email, opt => opt.Ignore())
+                .ForMember(dest => dest.RoleName, opt => opt.Ignore());
 
             /// dodawanie
             CreateMap<UserCreateDto, User>();
 
             /// edycja
             CreateMap<UserEditDto, User>(); 
+
 
 
 
