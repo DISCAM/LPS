@@ -1,4 +1,3 @@
-using LabelPrintingSystemApi_1._0.MappingProfiles;
 using LabelPrintingSystemApi_1._0.Middleware;
 using LabelPrintingSystemApi_1._0.Models.Contexts;
 using LabelPrintingSystemApi_1._0.Services;
@@ -91,8 +90,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 /// serwisy 
 builder.Services.AddScoped<IUserService, UserService>();
 
-// AutoMapper
-builder.Services.AddAutoMapper(config => { }, typeof(UserMappingProfile).Assembly);
+
 
 
 var app = builder.Build();

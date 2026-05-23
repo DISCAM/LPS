@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
+﻿
 using Data.Dtos.User;
 using LabelPrintingSystemApi_1._0.Exceptions;
 using LabelPrintingSystemApi_1._0.Models;
@@ -12,138 +11,105 @@ namespace LabelPrintingSystemApi_1._0.Services
     public class UserService : IUserService
     {
         private readonly DatabaseContext databaseContext;  // pola klasy
-        private readonly IMapper mapper;
+        private readonly IdentityContext identityContext;
         private readonly ILogger<UserService> logger;
 
-        public UserService(DatabaseContext databaseContext, IMapper mapper, ILogger<UserService> logger)
+        public UserService(DatabaseContext databaseContext, IdentityContext identityContext, ILogger<UserService> logger)
         {
             this.databaseContext = databaseContext;
-            this.mapper = mapper;
+            this.identityContext = identityContext;
             this.logger = logger;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
-            IQueryable<User> queryable = databaseContext.Users.Where(item => item.IsActive);
+            IQueryable<User> queryable = databaseContext.Users
+                .AsNoTracking()
+                .Where(item => item.IsActive);
 
-            //IQueryable<UserDto> gueryableUserDtos = quaryable.Select(item => new UserDto
-            //{
-            //    UserId = item.UserId,
-            //    Login = item.Login,
-            //    FullName = item.FullName,
-            //    RoleName = item.Role.Name,
-            //    CreatedAt = item.CreatedAt,
-            //    ModifiedAt = item.ModifiedAt
-            //});
-            
-            // rozbimy zamist select używamy automapera 
+            var users = await queryable
+                .Select(item => new
+                {
+                    item.UserId,
+                    item.IdentityUserId,
+                    item.FullName,
+                    item.CreatedAt,
+                    item.ModifiedAt
+                })
+                .ToListAsync();
 
-            IQueryable<UserDto> projectedQuery = queryable
-                .ProjectTo<UserDto>(mapper.ConfigurationProvider);
+            var identityUserIds = users
+                .Where(item => item.IdentityUserId != null)
+                .Select(item => item.IdentityUserId!)
+                .Distinct()
+                .ToList();
 
-            //List<UserDto> userDtos = await projectedQuery.ToListAsync();
+            var emails = await identityContext.Users
+                .AsNoTracking()
+                .Where(identityUser => identityUserIds.Contains(identityUser.Id))
+                .ToDictionaryAsync(
+                    identityUser => identityUser.Id,
+                    identityUser => identityUser.Email
+                );
 
-            return await projectedQuery.ToListAsync();
+            IEnumerable<UserDto> result = users.Select(user => new UserDto
+            {
+                UserId = user.UserId,
+                IdentityUserId = user.IdentityUserId,
+                Email = user.IdentityUserId != null &&
+                        emails.TryGetValue(user.IdentityUserId, out string? email)
+                            ? email
+                            : null,
+                FullName = user.FullName,
+                RoleName = string.Empty,
+                CreatedAt = user.CreatedAt,
+                ModifiedAt = user.ModifiedAt
+            });
+
+            return result;
         }
 
         public async Task<UserDto> GetUserByIdAsync(int id)
         {
-            IQueryable<User> quaryable = databaseContext.Users
-                .Where(item => item.UserId == id && item.IsActive);
-
-            //IQueryable<UserDto> gueryableUserDtos = quaryable
-            //    .Select(item => new UserDto
-            //{
-            //    UserId = item.UserId,
-            //    Login = item.Login,
-            //    FullName = item.FullName,
-            //    RoleName = item.Role.Name,
-            //    CreatedAt = item.CreatedAt,
-            //    ModifiedAt = item.ModifiedAt
-            //});
-
-            IQueryable<UserDto> gueryableUserDtos = quaryable
-                .ProjectTo<UserDto>(mapper.ConfigurationProvider);
-
-            return await gueryableUserDtos.FirstOrDefaultAsync() 
-                ?? throw new NotFoundException("User not found");
-        }
-
-        public async Task CreateUserAsync(UserCreateDto dto)
+            var user = await databaseContext.Users
+                .AsNoTracking()
+                .Where(item => item.UserId == id && item.IsActive)
+                .Select(item => new
         {
-            logger.LogInformation($"Start Creating User {dto.Login}");
-            
-            User user = mapper.Map<User>(dto);
+            item.UserId,
+            item.IdentityUserId,
+            item.FullName,
+            item.CreatedAt,
+            item.ModifiedAt
+        })
+        .FirstOrDefaultAsync()
+        ?? throw new NotFoundException("User not found");
 
+            string? email = null;
 
-            // User user = new()
-            // {
-            //     Login = dto.Login,
-            //     FullName = dto.FullName,
-            //     RoleId = dto.RoleId,
-            //     IsActive = true,
-            //     CreatedAt = DateTime.Now
-            // };
-
-            user.IsActive = true;
-            user.CreatedAt = DateTime.Now;
-           
-
-            databaseContext.Users.Add(user);
-            await databaseContext.SaveChangesAsync();
-
-            logger.LogInformation($"User was added login : {dto.Login}, id: {user.UserId}");
-
-
-        }
-
-        public async Task EditUserAsync(int id, UserEditDto dto)
-        {
-            if (id != dto.UserId)
+            if (user.IdentityUserId != null)
             {
-                throw new BadRequestException("ID mismatch");
+                email = await identityContext.Users
+                    .AsNoTracking()
+                    .Where(identityUser => identityUser.Id == user.IdentityUserId)
+                    .Select(identityUser => identityUser.Email)
+                    .FirstOrDefaultAsync();
             }
 
-            logger.LogWarning($"Uwaga user został edytowany {dto.UserId}");
-
-            User user = await databaseContext.Users
-                .FirstOrDefaultAsync(item => item.UserId == dto.UserId && item.IsActive)
-                ?? throw new NotFoundException("Customer not found");
-
-
-
-            mapper.Map(dto, user);
-
-            //user.Login = dto.Login;
-            //user.FullName = dto.FullName;
-            //user.RoleId = dto.RoleId;
-            //user.IsActive = true;
-            user.ModifiedAt = DateTime.Now;
-              
-
-            await databaseContext.SaveChangesAsync();
-
+            return new UserDto
+            {
+                UserId = user.UserId,
+                IdentityUserId = user.IdentityUserId,
+                Email = email,
+                FullName = user.FullName,
+                RoleName = string.Empty,
+                CreatedAt = user.CreatedAt,
+                ModifiedAt = user.ModifiedAt
+            };
         }
 
-        public async Task DeleteCustomerAsync(int id)
-        {
-            
+        
 
-            User user = await databaseContext.Users
-                .FirstOrDefaultAsync(item => item.UserId == id && item.IsActive)
-                ?? throw new NotFoundException("Customer Not Found");
-
-
-
-            user.IsActive = false;
-            user.ModifiedAt = DateTime.Now;
-            //data usuniecia 
-            //kto zmodyfikował usuwał 
-            await databaseContext.SaveChangesAsync();
-
-            logger.LogError($"|{user.FullName}| User został usunięty przez");
-
-        }
 
     }
 }
