@@ -1,0 +1,10 @@
+.vs/
+bin/
+obj/
+Logs/
+*.log
+
+appsettings.json
+appsettings.Development.json
+LabelPrintingSystemApi_1.0/appsettings.json
+LabelPrintingSystemApi_1.0/appsettings.Development.json
