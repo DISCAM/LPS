@@ -1,4 +1,5 @@
 ﻿using Data.Dtos.Auth;
+
 namespace LabelPrintingSystemApi_1._0.Services.Interfaces
 {
     public interface IAuthService
@@ -7,6 +8,8 @@ namespace LabelPrintingSystemApi_1._0.Services.Interfaces
         Task RegisterAsync(RegisterUserDto dto);
         Task CreateDefaultRolesAsync();
         Task AssignRoleAsync(AssignRoleDto dto);
+        Task DeleteUserAsync(int id);
+        Task EditUserAsync(UserEditDto dto);
     }
 }
 

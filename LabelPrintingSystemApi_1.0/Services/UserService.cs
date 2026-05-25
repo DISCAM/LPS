@@ -52,16 +52,41 @@ namespace LabelPrintingSystemApi_1._0.Services
                     identityUser => identityUser.Email
                 );
 
+            var roles = await (
+                from userRole in identityContext.UserRoles.AsNoTracking()
+                join role in identityContext.Roles.AsNoTracking()
+                on userRole.RoleId equals role.Id
+                where identityUserIds.Contains(userRole.UserId)
+                select new
+                {
+                    IdentityUserId = userRole.UserId,
+                    RoleName = role.Name
+                }).ToListAsync();
+
+            var roleNames = roles
+                .GroupBy(item => item.IdentityUserId)
+                .ToDictionary(
+                group => group.Key,
+                group => string.Join(", ", group.Select(item => item.RoleName))
+                );
+
             IEnumerable<UserDto> result = users.Select(user => new UserDto
             {
                 UserId = user.UserId,
                 IdentityUserId = user.IdentityUserId,
+
                 Email = user.IdentityUserId != null &&
-                        emails.TryGetValue(user.IdentityUserId, out string? email)
-                            ? email
-                            : null,
+                emails.TryGetValue(user.IdentityUserId, out string? email)
+                    ? email
+                    : null,
+
                 FullName = user.FullName,
-                RoleName = string.Empty,
+
+                RoleName = user.IdentityUserId != null &&
+                   roleNames.TryGetValue(user.IdentityUserId, out string? roleName)
+                    ? roleName ?? string.Empty
+                    : string.Empty,
+
                 CreatedAt = user.CreatedAt,
                 ModifiedAt = user.ModifiedAt
             });
@@ -72,18 +97,18 @@ namespace LabelPrintingSystemApi_1._0.Services
         public async Task<UserDto> GetUserByIdAsync(int id)
         {
             var user = await databaseContext.Users
-                .AsNoTracking()
-                .Where(item => item.UserId == id && item.IsActive)
-                .Select(item => new
-        {
-            item.UserId,
-            item.IdentityUserId,
-            item.FullName,
-            item.CreatedAt,
-            item.ModifiedAt
-        })
-        .FirstOrDefaultAsync()
-        ?? throw new NotFoundException("User not found");
+       .AsNoTracking()
+       .Where(item => item.UserId == id && item.IsActive)
+       .Select(item => new
+       {
+           item.UserId,
+           item.IdentityUserId,
+           item.FullName,
+           item.CreatedAt,
+           item.ModifiedAt
+       })
+       .FirstOrDefaultAsync()
+       ?? throw new NotFoundException("User not found");
 
             string? email = null;
 
@@ -96,19 +121,36 @@ namespace LabelPrintingSystemApi_1._0.Services
                     .FirstOrDefaultAsync();
             }
 
+            List<string> roleNames = new();
+
+            if (user.IdentityUserId != null)
+            {
+                roleNames = await identityContext.UserRoles
+                    .AsNoTracking()
+                    .Where(userRole => userRole.UserId == user.IdentityUserId)
+                    .Join(
+                        identityContext.Roles.AsNoTracking(),
+                        userRole => userRole.RoleId,
+                        role => role.Id,
+                        (userRole, role) => role.Name
+                    )
+                    .Where(roleName => roleName != null)
+                    .Select(roleName => roleName!)
+                    .ToListAsync();
+            }
+
             return new UserDto
             {
                 UserId = user.UserId,
                 IdentityUserId = user.IdentityUserId,
                 Email = email,
                 FullName = user.FullName,
-                RoleName = string.Empty,
+                RoleName = string.Join(", ", roleNames),
                 CreatedAt = user.CreatedAt,
                 ModifiedAt = user.ModifiedAt
             };
         }
 
-        
 
 
     }

@@ -5,9 +5,13 @@ using LabelPrintingSystemApi_1._0.Models.Contexts;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using NLog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+
+
 namespace LabelPrintingSystemApi_1._0.Services
 {
     public class AuthService : IAuthService
@@ -16,17 +20,20 @@ namespace LabelPrintingSystemApi_1._0.Services
         private readonly SignInManager<IdentityUser> signInManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly DatabaseContext databaseContext;
+        private readonly ILogger<AuthService> logger;
         private readonly IConfiguration configuration;
         public AuthService(UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             DatabaseContext databaseContext,
+            ILogger<AuthService> logger,
             IConfiguration configuration)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.roleManager = roleManager;
             this.databaseContext = databaseContext;
+            this.logger = logger;
             this.configuration = configuration;
         }
 
@@ -46,7 +53,7 @@ namespace LabelPrintingSystemApi_1._0.Services
                 throw new BadRequestException(errors);
             }
 
-            string defaultRole = "Operator";
+            string defaultRole = "User";
 
             bool roleExists = await roleManager.RoleExistsAsync(defaultRole);
 
@@ -106,6 +113,139 @@ namespace LabelPrintingSystemApi_1._0.Services
             };
         }
 
+
+
+        public async Task EditUserAsync(UserEditDto dto)
+        {
+            logger.LogInformation($"Start editing user. UserId: {dto.UserId}");
+
+            User user = await databaseContext.Users
+                .FirstOrDefaultAsync(item => item.UserId == dto.UserId && item.IsActive)
+                ?? throw new NotFoundException("User not found");
+
+            if (user.IdentityUserId == null)
+            {
+                throw new Exception("User is not connected with Identity account");
+            }
+
+            IdentityUser identityUser = await userManager.FindByIdAsync(user.IdentityUserId)
+                ?? throw new NotFoundException("Identity user not found");
+
+            IdentityResult emailResult = await userManager.SetEmailAsync(identityUser, dto.Email);
+
+            if (!emailResult.Succeeded)
+            {
+                string errors = string.Join(", ", emailResult.Errors.Select(error => error.Description));
+                throw new Exception($"Changing email failed: {errors}");
+            }
+
+            IdentityResult userNameResult = await userManager.SetUserNameAsync(identityUser, dto.Email);
+
+            if (!userNameResult.Succeeded)
+            {
+                string errors = string.Join(", ", userNameResult.Errors.Select(error => error.Description));
+                throw new Exception($"Changing username failed: {errors}");
+            }
+
+            IList<string> currentRoles = await userManager.GetRolesAsync(identityUser);
+
+            if (currentRoles.Any())
+            {
+                IdentityResult removeRolesResult = await userManager.RemoveFromRolesAsync(identityUser, currentRoles);
+
+                if (!removeRolesResult.Succeeded)
+                {
+                    string errors = string.Join(", ", removeRolesResult.Errors.Select(error => error.Description));
+                    throw new Exception($"Removing old roles failed: {errors}");
+                }
+            }
+
+            if (dto.RoleNames.Any())
+            {
+                foreach (string roleName in dto.RoleNames)
+                {
+                    bool roleExists = await roleManager.RoleExistsAsync(roleName);
+
+                    if (!roleExists)
+                    {
+                        throw new NotFoundException($"Role '{roleName}' not found");
+                    }
+                }
+
+                IdentityResult addRolesResult = await userManager.AddToRolesAsync(identityUser, dto.RoleNames);
+
+                if (!addRolesResult.Succeeded)
+                {
+                    string errors = string.Join(", ", addRolesResult.Errors.Select(error => error.Description));
+                    throw new Exception($"Adding new roles failed: {errors}");
+                }
+            }
+
+            user.FullName = dto.FullName;
+            user.ModifiedAt = DateTime.UtcNow;
+
+            await databaseContext.SaveChangesAsync();
+
+            logger.LogInformation(
+                $"User was edited. UserId: {user.UserId}, IdentityUserId: {user.IdentityUserId}");
+        }
+
+
+        public async Task DeleteUserAsync(int id)
+        {
+            User user = await databaseContext.Users
+                .FirstOrDefaultAsync(item => item.UserId == id && item.IsActive)
+                ?? throw new NotFoundException("User not found");
+
+            if (user.IdentityUserId == null)
+            {
+                throw new Exception("User is not connected with Identity account");
+            }
+
+            IdentityUser identityUser = await userManager.FindByIdAsync(user.IdentityUserId)
+                ?? throw new NotFoundException("Identity user not found");
+
+            IList<string> roles = await userManager.GetRolesAsync(identityUser);
+
+            if (roles.Any())
+            {
+                IdentityResult removeRolesResult = await userManager.RemoveFromRolesAsync(identityUser, roles);
+
+                if (!removeRolesResult.Succeeded)
+                {
+                    string errors = string.Join(", ", removeRolesResult.Errors.Select(error => error.Description));
+                    throw new Exception($"Removing user roles failed: {errors}");
+                }
+            }
+
+            IdentityResult lockoutEnabledResult = await userManager.SetLockoutEnabledAsync(identityUser, true);
+
+            if (!lockoutEnabledResult.Succeeded)
+            {
+                string errors = string.Join(", ", lockoutEnabledResult.Errors.Select(error => error.Description));
+                throw new Exception($"Enabling lockout failed: {errors}");
+            }
+
+            IdentityResult lockoutResult = await userManager.SetLockoutEndDateAsync(
+                identityUser,
+                DateTimeOffset.UtcNow.AddYears(100));
+
+            if (!lockoutResult.Succeeded)
+            {
+                string errors = string.Join(", ", lockoutResult.Errors.Select(error => error.Description));
+                throw new Exception($"Locking user account failed: {errors}");
+            }
+
+            user.IsActive = false;
+            user.ModifiedAt = DateTime.UtcNow;
+
+            await databaseContext.SaveChangesAsync();
+
+            logger.LogInformation($"User was deactivated. UserId: {user.UserId}, IdentityUserId: {user.IdentityUserId}");
+        }
+
+
+
         public async Task AssignRoleAsync(AssignRoleDto dto)
         {
             IdentityUser? user = await userManager.FindByEmailAsync(dto.Email);
@@ -143,7 +283,9 @@ namespace LabelPrintingSystemApi_1._0.Services
         {
             string[] roles =
             {
+                "User",
                 "Admin",
+                "SuperAdmin",
                 "Operator",
                 "Manager"
             };

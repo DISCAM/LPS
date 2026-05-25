@@ -13,6 +13,11 @@ namespace Data
         public const string LOGIN = "/login";
         public const string CDR = "/create-default-role";
         public const string AR = "/assign-role";
+        public const string DELETE = "/delete-user";
+        public const string EDIT = "/edit-user";
+
+
+
 
     }
 }

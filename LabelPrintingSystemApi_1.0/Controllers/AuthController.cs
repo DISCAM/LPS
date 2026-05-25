@@ -47,7 +47,32 @@ namespace LabelPrintingSystemApi_1._0.Controllers
             await authService.AssignRoleAsync(dto);
             return Ok("Role assigned successfully");
         }
-        
+
+        [HttpDelete]
+        [Route(Urls.DELETE)]
+        public async Task<IActionResult> DeleteUserAsync(int id)
+        {
+            await authService.DeleteUserAsync(id);
+
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route(Urls.EDIT)]
+        public async Task<IActionResult> EditUserAsync(int id, [FromBody] UserEditDto dto)
+        {
+            if (id != dto.UserId)
+            {
+                return BadRequest("ID mismatch");
+            }
+
+            await authService.EditUserAsync(dto);
+
+            return Ok();
+        }
+
+
+
         [Authorize]
         [HttpGet]
         [Route("me")]
