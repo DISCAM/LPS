@@ -36,6 +36,17 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactClient", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 ///swager, scallar
 builder.Services.AddOpenApi();
 
@@ -106,9 +117,9 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseCors("ReactClient");
 
-
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 
 app.UseAuthentication();
