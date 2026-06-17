@@ -1,11 +1,13 @@
 ﻿using Data;
 using Data.Dtos.User;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LabelPrintingSystemApi_1._0.Controllers
 {
     [ApiController]
+    [Authorize(Roles = "SuperAdmin")]
     public class UserController : BaseController
     {
         private readonly IUserService service;  // pole klasy
@@ -17,13 +19,13 @@ namespace LabelPrintingSystemApi_1._0.Controllers
             this.logger = logger;
         }
 
-
+        
         [HttpGet]
         [Route(Urls.USERS)]
         public async Task<IActionResult> GetAllUsersAsync()
         {
             IEnumerable<UserDto> dtos = await service.GetAllUsersAsync();
-            return Json(dtos);
+            return Ok(dtos);
         }
         
 
@@ -33,7 +35,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
         public async Task<IActionResult> GetUserByIdAsync(int id)
         {
             UserDto dto = await service.GetUserByIdAsync(id);
-            return Json(dto);
+            return Ok(dto);
         }
 
         

@@ -97,17 +97,16 @@ namespace LabelPrintingSystemApi_1._0.Services
         public async Task<UserDto> GetUserByIdAsync(int id)
         {
             var user = await databaseContext.Users
-       .AsNoTracking()
-       .Where(item => item.UserId == id && item.IsActive)
-       .Select(item => new
-       {
+            .AsNoTracking()
+            .Where(item => item.UserId == id && item.IsActive)
+            .Select(item => new
+        {
            item.UserId,
            item.IdentityUserId,
            item.FullName,
            item.CreatedAt,
            item.ModifiedAt
-       })
-       .FirstOrDefaultAsync()
+        }).FirstOrDefaultAsync()
        ?? throw new NotFoundException("User not found");
 
             string? email = null;

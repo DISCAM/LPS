@@ -13,6 +13,8 @@ namespace LabelPrintingSystemApi_1._0.Controllers
         {
             this.authService = authService;
         }
+
+        [Authorize(Roles = "SuperAdmin")]
         [HttpPost]
         [Route(Urls.REGISTER)]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserDto dto)
@@ -20,6 +22,8 @@ namespace LabelPrintingSystemApi_1._0.Controllers
             await authService.RegisterAsync(dto);
             return Ok("User registered successfully");
         }
+
+        [AllowAnonymous]
         [HttpPost]
         [Route(Urls.LOGIN)]
         public async Task<IActionResult> LoginAsync([FromBody] LoginUserDto dto)
@@ -32,6 +36,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         [HttpPost]
         [Route(Urls.CDR)]
         public async Task<IActionResult> CreateDefaultRolesAsync()
@@ -40,6 +45,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
             return Ok("Default roles created successfully");
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         [HttpPost]
         [Route(Urls.AR)]
         public async Task<IActionResult> AssignRoleAsync([FromBody] AssignRoleDto dto)
@@ -48,6 +54,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
             return Ok("Role assigned successfully");
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         [HttpDelete]
         [Route(Urls.DELETE)]
         public async Task<IActionResult> DeleteUserAsync(int id)
@@ -57,6 +64,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         [HttpPut]
         [Route(Urls.EDIT)]
         public async Task<IActionResult> EditUserAsync(int id, [FromBody] UserEditDto dto)

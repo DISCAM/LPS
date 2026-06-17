@@ -22,7 +22,8 @@ namespace LabelPrintingSystemApi_1._0.Services
         private readonly DatabaseContext databaseContext;
         private readonly ILogger<AuthService> logger;
         private readonly IConfiguration configuration;
-        public AuthService(UserManager<IdentityUser> userManager,
+        public AuthService(
+            UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             DatabaseContext databaseContext,
@@ -227,8 +228,7 @@ namespace LabelPrintingSystemApi_1._0.Services
             }
 
             IdentityResult lockoutResult = await userManager.SetLockoutEndDateAsync(
-                identityUser,
-                DateTimeOffset.UtcNow.AddYears(100));
+                identityUser, DateTimeOffset.UtcNow.AddYears(100));
 
             if (!lockoutResult.Succeeded)
             {
