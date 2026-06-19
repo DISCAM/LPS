@@ -97,9 +97,9 @@ builder.Services.AddAuthorization();
 /// serwisy 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-
-/// serwisy 
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+//builder.Services.AddScoped<IUserService, UserService>();
 
 
 
