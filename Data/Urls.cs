@@ -35,5 +35,13 @@ namespace Data
         public const string CUSTOMER_EDIT = "customer-edit/{id}";
         public const string CUSTOMER_DELETE = "customer-delete/{id}";
 
+        // Printers
+
+        public const string PRINTERS = "/printers";
+        public const string PRINTER_ID = "/printer/{id}";
+        public const string PRINTER_ADD = "/printer-add";
+        public const string PRINTER_EDIT = "/printer-edit/{id}";
+        public const string PRINTER_DELETE = "/printer-delete/{id}";
+
     }
 }
