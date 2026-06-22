@@ -43,5 +43,13 @@ namespace Data
         public const string PRINTER_EDIT = "/printer-edit/{id}";
         public const string PRINTER_DELETE = "/printer-delete/{id}";
 
+        // Label Templates 
+
+        public const string LABEL_TEMPLATES = "/label-templates";
+        public const string LABEL_TEMPLATE_ID = "/label-template/{id}";
+        public const string LABEL_TEMPLATE_ADD = "/label-template-add";
+        public const string LABEL_TEMPLATE_EDIT = "/label-template-edit/{id}";
+        public const string LABEL_TEMPLATE_DELETE = "/label-template-delete/{id}";
+
     }
 }

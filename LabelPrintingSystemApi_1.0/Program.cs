@@ -100,6 +100,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPrinterService, PrinterService>();
+builder.Services.AddScoped<ILabelTemplateService, LabelTemplateService>();
 //builder.Services.AddScoped<IUserService, UserService>();
 
 
