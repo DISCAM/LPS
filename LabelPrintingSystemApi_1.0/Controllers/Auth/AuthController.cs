@@ -4,7 +4,7 @@ using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-namespace LabelPrintingSystemApi_1._0.Controllers
+namespace LabelPrintingSystemApi_1._0.Controllers.Auth
 {
     public class AuthController : BaseController
     {

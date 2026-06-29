@@ -51,5 +51,8 @@ namespace Data
         public const string LABEL_TEMPLATE_EDIT = "/label-template-edit/{id}";
         public const string LABEL_TEMPLATE_DELETE = "/label-template-delete/{id}";
 
+        // prinyt label 
+
+        public const string PRINT_EAN = "/print-ean";
     }
 }

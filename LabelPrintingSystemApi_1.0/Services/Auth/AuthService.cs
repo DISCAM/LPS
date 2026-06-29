@@ -12,7 +12,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace LabelPrintingSystemApi_1._0.Services
+namespace LabelPrintingSystemApi_1._0.Services.Auth
 {
     public class AuthService : IAuthService
     {

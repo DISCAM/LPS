@@ -5,7 +5,7 @@ using LabelPrintingSystemApi_1._0.Models.Contexts;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace LabelPrintingSystemApi_1._0.Services
+namespace LabelPrintingSystemApi_1._0.Services.Kartoteki
 {
     public class ProductService : IProductService
     {

@@ -1,7 +1,11 @@
 using LabelPrintingSystemApi_1._0.Middleware;
 using LabelPrintingSystemApi_1._0.Models.Contexts;
-using LabelPrintingSystemApi_1._0.Services;
+using LabelPrintingSystemApi_1._0.OpenApi;
+using LabelPrintingSystemApi_1._0.Services.Auth;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
+using LabelPrintingSystemApi_1._0.Services.Kartoteki;
+using LabelPrintingSystemApi_1._0.Services.Konfiguracja;
+using LabelPrintingSystemApi_1._0.Services.PrintLabel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +52,10 @@ builder.Services.AddCors(options =>
 });
 
 ///swager, scallar
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{   //dodanie autoryzacji do swager
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 
 
 
@@ -101,7 +108,8 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPrinterService, PrinterService>();
 builder.Services.AddScoped<ILabelTemplateService, LabelTemplateService>();
-//builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPrintLabelService, PrintLabelService>();
+
 
 
 
@@ -116,7 +124,11 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    //app.MapScalarApiReference();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "LPS API v1");
+    });
 }
 
 app.UseCors("ReactClient");
