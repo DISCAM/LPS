@@ -110,6 +110,19 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintLabel
 
                 await databaseContext.SaveChangesAsync();
 
+                PrintJobHistory printJobHistory = new PrintJobHistory
+                {
+                    PrintJobId = printJob.PrintJobId,
+                    Status = "QUEUED",
+                    CreatedAt = DateTime.UtcNow,
+                    Note = "Utworzono zadanie wydruku."
+                };
+
+                databaseContext.PrintJobHistories.Add(printJobHistory);
+
+                await databaseContext.SaveChangesAsync();
+
+
                 await transaction.CommitAsync();
 
                 logger.LogInformation(

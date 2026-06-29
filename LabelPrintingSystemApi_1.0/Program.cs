@@ -5,6 +5,7 @@ using LabelPrintingSystemApi_1._0.Services.Auth;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using LabelPrintingSystemApi_1._0.Services.Kartoteki;
 using LabelPrintingSystemApi_1._0.Services.Konfiguracja;
+using LabelPrintingSystemApi_1._0.Services.PrintJobs;
 using LabelPrintingSystemApi_1._0.Services.PrintLabel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -53,8 +54,10 @@ builder.Services.AddCors(options =>
 
 ///swager, scallar
 builder.Services.AddOpenApi(options =>
-{   //dodanie autoryzacji do swager
+{   //dodanie autoryzacji JWT do swager
     options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+    // Poprawny opis typów int w Swagger UI.
+    options.AddSchemaTransformer<IntegerSchemaTransformer>();
 });
 
 
@@ -109,6 +112,7 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPrinterService, PrinterService>();
 builder.Services.AddScoped<ILabelTemplateService, LabelTemplateService>();
 builder.Services.AddScoped<IPrintLabelService, PrintLabelService>();
+builder.Services.AddScoped<IPrintJobService, PrintJobService>();
 
 
 

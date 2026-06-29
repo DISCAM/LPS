@@ -51,8 +51,13 @@ namespace Data
         public const string LABEL_TEMPLATE_EDIT = "/label-template-edit/{id}";
         public const string LABEL_TEMPLATE_DELETE = "/label-template-delete/{id}";
 
-        // prinyt label 
+        // print label 
 
         public const string PRINT_EAN = "/print-ean";
+
+        // print Job
+
+        public const string PRINT_JOBS = "print-jobs";
+        public const string PRINT_JOBS_ID = "print-jobs/{id}";
     }
 }
