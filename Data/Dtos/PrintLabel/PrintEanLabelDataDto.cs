@@ -25,5 +25,9 @@ namespace Data.Dtos.PrintLabel
         public int LabelTemplateId { get; set; }
 
         public string TemplateName { get; set; } = null!;
+
+        public string TemplateReference { get; set; } = null!;
+
+        public int TemplateVersionNo { get; set; }
     }
 }

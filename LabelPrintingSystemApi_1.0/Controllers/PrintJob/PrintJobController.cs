@@ -2,7 +2,9 @@
 using Data.Dtos.PrintJob;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LabelPrintingSystemApi_1._0.Controllers.PrintJobs
 {
@@ -34,6 +36,47 @@ namespace LabelPrintingSystemApi_1._0.Controllers.PrintJobs
 
             return Ok(printJob);
         }
+
+        [HttpPatch]
+        [Route(Urls.PRINT_JOBS_CANCEL)]
+        public async Task<IActionResult> PrintJobIdCancelAsync([FromRoute] int id)
+        {
+            string? identityUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId))
+            {
+                return Unauthorized();
+            }
+
+            await printJobService.CancelPrintJobAsync(id, identityUserId);
+
+            return NoContent();
+
+        }
+
+        [HttpPost]
+        [Route(Urls.PRINT_JOBS_REPRINT)]
+        public async Task<IActionResult> ReprintPrintJobByIdAsync([FromRoute] int id)
+        {
+            string? identityUserId = User
+                .FindFirst(ClaimTypes.NameIdentifier)
+                ?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId))
+            {
+                return Unauthorized();
+            }
+
+            ReprintPrintJobResultDto result =
+                await printJobService.ReprintPrintJobAsync(
+                    id,
+                    identityUserId
+                );
+
+            return StatusCode(StatusCodes.Status201Created, result);
+        }
+
+
 
 
 

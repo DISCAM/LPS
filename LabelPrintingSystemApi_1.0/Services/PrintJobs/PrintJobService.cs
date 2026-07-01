@@ -1,6 +1,7 @@
 ﻿using Data.Dtos.PrintJob;
 using Data.Dtos.PrintLabel;
 using LabelPrintingSystemApi_1._0.Exceptions;
+using LabelPrintingSystemApi_1._0.Models;
 using LabelPrintingSystemApi_1._0.Models.Contexts;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -152,6 +153,168 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
 
             return result.Details;
         }
+
+        public async Task CancelPrintJobAsync(int printJobId, string identityUserId)
+        {
+            User currentUser = await databaseContext.Users
+                .FirstOrDefaultAsync(user =>
+                user.IdentityUserId == identityUserId &&
+                user.IsActive)
+                ?? throw new NotFoundException("Nie znaleziono aktywnego użytkownika.");
+
+            PrintJob printJob = await databaseContext.PrintJobs
+                .FirstOrDefaultAsync(job => job.PrintJobId == printJobId)
+                ?? throw new NotFoundException(
+                    $"Nie znaleziono zadania wydruku o ID {printJobId}."
+                );
+
+            if (printJob.Status != "QUEUED")
+            {
+                throw new BadRequestException(
+                    "Można anulować wyłącznie zadanie wydruku ze statusem QUEUED."
+                );
+            }
+
+            DateTime cancelledAt = DateTime.UtcNow;
+
+            printJob.Status = "CANCELLED";
+            printJob.ModifiedByUserId = currentUser.UserId;
+            printJob.ModifiedAt = cancelledAt;
+
+            PrintJobHistory history = new PrintJobHistory
+            {
+                PrintJobId = printJob.PrintJobId,
+                Status = "CANCELLED",
+                CreatedAt = cancelledAt,
+                Note = "Zadanie wydruku anulowane przez użytkownika."
+            };
+
+            databaseContext.PrintJobHistories.Add(history);
+
+            await databaseContext.SaveChangesAsync();
+
+            logger.LogInformation(
+                "Print job {PrintJobId} was cancelled by user {UserId}.",
+                printJob.PrintJobId,
+                currentUser.UserId
+            );
+        }
+
+        public async Task<ReprintPrintJobResultDto> ReprintPrintJobAsync(int printJobId, string identityUserId)
+        {
+            User currentUser = await databaseContext.Users
+                .FirstOrDefaultAsync(user =>
+                    user.IdentityUserId == identityUserId &&
+                    user.IsActive)
+                ?? throw new NotFoundException(
+                    "Nie znaleziono aktywnego użytkownika."
+                );
+
+            PrintJob sourcePrintJob = await databaseContext.PrintJobs
+                .Include(printJob => printJob.Printer)
+                .FirstOrDefaultAsync(printJob =>
+                    printJob.PrintJobId == printJobId)
+                ?? throw new NotFoundException(
+                    $"Nie znaleziono zadania wydruku o ID {printJobId}."
+                );
+
+            bool canBeReprinted =
+                sourcePrintJob.Status == "PRINTED" ||
+                sourcePrintJob.Status == "ERROR" ||
+                sourcePrintJob.Status == "CANCELLED";
+
+            if (!canBeReprinted)
+            {
+                throw new BadRequestException(
+                    "Reprint można utworzyć wyłącznie dla zadania " +
+                    "ze statusem PRINTED, ERROR lub CANCELLED."
+                );
+            }
+
+            if (!sourcePrintJob.Printer.IsActive)
+            {
+                throw new BadRequestException(
+                    "Nie można utworzyć reprintu, ponieważ drukarka " +
+                    "przypisana do pierwotnego zadania jest nieaktywna."
+                );
+            }
+
+            DateTime reprintCreatedAt = DateTime.UtcNow;
+
+            await using var transaction =
+                await databaseContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                PrintJob reprintPrintJob = new PrintJob
+                {
+                    LabelId = sourcePrintJob.LabelId,
+
+                    PrinterId = sourcePrintJob.PrinterId,
+
+                    CreatedByUserId = currentUser.UserId,
+
+                    Copies = sourcePrintJob.Copies,
+
+                    Status = "QUEUED",
+
+                    IsReprint = true,
+
+                    CreatedAt = reprintCreatedAt,
+                };
+
+                databaseContext.PrintJobs.Add(reprintPrintJob);
+
+                await databaseContext.SaveChangesAsync();
+
+                PrintJobHistory history = new PrintJobHistory
+                {
+                    PrintJobId = reprintPrintJob.PrintJobId,
+
+                    Status = "QUEUED",
+
+                    CreatedAt = reprintCreatedAt,
+
+                    Note =
+                        $"Utworzono reprint na podstawie zadania wydruku " +
+                        $"o ID {sourcePrintJob.PrintJobId}.",
+                };
+
+                databaseContext.PrintJobHistories.Add(history);
+
+                await databaseContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                logger.LogInformation(
+                    "Reprint print job {ReprintPrintJobId} was created " +
+                    "from print job {SourcePrintJobId} by user {UserId}.",
+                    reprintPrintJob.PrintJobId,
+                    sourcePrintJob.PrintJobId,
+                    currentUser.UserId
+                );
+
+                return new ReprintPrintJobResultDto
+                {
+                    PrintJobId = reprintPrintJob.PrintJobId,
+
+                    LabelId = reprintPrintJob.LabelId,
+
+                    Status = reprintPrintJob.Status,
+
+                    IsReprint = reprintPrintJob.IsReprint,
+
+                    CreatedAt = reprintPrintJob.CreatedAt,
+                };
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                throw;
+            }
+        }
+
 
         private PrintEanLabelDataDto? DeserializeLabelData(string? labelDataJson)
         {
