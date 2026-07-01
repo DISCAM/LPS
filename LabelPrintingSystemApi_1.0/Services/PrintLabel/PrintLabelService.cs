@@ -13,6 +13,12 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintLabel
         private readonly DatabaseContext databaseContext;
         private readonly ILogger<PrintLabelService> logger;
 
+        private static readonly JsonSerializerOptions labelDataJsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+
         public PrintLabelService(
             DatabaseContext databaseContext,
             ILogger<PrintLabelService> logger
@@ -61,19 +67,41 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintLabel
                     item.IsActive)
                 ?? throw new NotFoundException("Active printer not found");
 
-            var labelData = new
+            //var labelData = new
+            //{
+            //    productId = product.ProductId,
+            //    productCode = product.ProductCode,
+            //    productName = product.Name,
+            //    description = product.Description,
+            //    ean = product.Ean,
+            //    gtin = product.Gtin,
+            //    labelTemplateId = labelTemplate.LabelTemplateId,
+            //    templateName = labelTemplate.Name
+            //};
+
+            //string labelDataJson = JsonSerializer.Serialize(labelData);
+
+
+            //używamy już do tego dto 
+
+            PrintEanLabelDataDto labelData = new PrintEanLabelDataDto
             {
-                productId = product.ProductId,
-                productCode = product.ProductCode,
-                productName = product.Name,
-                description = product.Description,
-                ean = product.Ean,
-                gtin = product.Gtin,
-                labelTemplateId = labelTemplate.LabelTemplateId,
-                templateName = labelTemplate.Name
+                ProductId = product.ProductId,
+                ProductCode = product.ProductCode,
+                ProductName = product.Name,
+                Description = product.Description,
+                Ean = product.Ean,
+                Gtin = product.Gtin,
+                LabelTemplateId = labelTemplate.LabelTemplateId,
+                TemplateName = labelTemplate.Name
             };
 
-            string labelDataJson = JsonSerializer.Serialize(labelData);
+            string labelDataJson = JsonSerializer.Serialize(
+                labelData,
+                labelDataJsonOptions
+            );
+
+            DateTime createdAt = DateTime.UtcNow;
 
             await using var transaction =
                 await databaseContext.Database.BeginTransactionAsync();
@@ -88,7 +116,7 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintLabel
                     PrimaryCodeValue = product.Ean,
                     LabelDataJson = labelDataJson,
                     CreatedByUserId = currentUser.UserId,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = createdAt
                 };
 
                 databaseContext.Labels.Add(label);
@@ -103,7 +131,7 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintLabel
                     Copies = dto.Copies,
                     Status = "QUEUED",
                     IsReprint = false,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = createdAt
                 };
 
                 databaseContext.PrintJobs.Add(printJob);
@@ -114,7 +142,7 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintLabel
                 {
                     PrintJobId = printJob.PrintJobId,
                     Status = "QUEUED",
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = createdAt,
                     Note = "Utworzono zadanie wydruku."
                 };
 

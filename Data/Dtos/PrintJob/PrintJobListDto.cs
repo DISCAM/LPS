@@ -8,19 +8,19 @@ namespace Data.Dtos.PrintJob
 
         public int LabelId { get; set; }
 
-        public string LabelType { get; set; } = string.Empty;
+        public string LabelType { get; set; } = null!;
 
         public string? ProductName { get; set; }
 
         public string? PrimaryCodeValue { get; set; }
 
-        public string TemplateName { get; set; } = string.Empty;
+        public string TemplateName { get; set; } = null!;
 
-        public string PrinterName { get; set; } = string.Empty;
+        public string PrinterName { get; set; } = null!;
 
         public int Copies { get; set; }
 
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; set; } = null!;
 
         public bool IsReprint { get; set; }
 

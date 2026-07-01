@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Data.Dtos.PrintLabel;
+
 
 namespace Data.Dtos.PrintJob
 {
@@ -9,7 +9,7 @@ namespace Data.Dtos.PrintJob
 
         public int LabelId { get; set; }
 
-        public string LabelType { get; set; } = string.Empty;
+        public string LabelType { get; set; } = null!;
 
         public string? ProductCode { get; set; }
 
@@ -17,13 +17,13 @@ namespace Data.Dtos.PrintJob
 
         public string? PrimaryCodeValue { get; set; }
 
-        public string TemplateName { get; set; } = string.Empty;
+        public string TemplateName { get; set; } = null!;
 
-        public string PrinterName { get; set; } = string.Empty;
+        public string PrinterName { get; set; } = null!;
 
         public int Copies { get; set; }
 
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; set; } = null!;
 
         public bool IsReprint { get; set; }
 
@@ -37,6 +37,7 @@ namespace Data.Dtos.PrintJob
 
         public DateTime? ModifiedAt { get; set; }
 
+        public PrintEanLabelDataDto? LabelData { get; set; }
         public List<PrintJobHistoryDto> History { get; set; } = [];
     }
 }

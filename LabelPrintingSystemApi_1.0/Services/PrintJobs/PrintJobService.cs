@@ -1,8 +1,10 @@
 ﻿using Data.Dtos.PrintJob;
+using Data.Dtos.PrintLabel;
 using LabelPrintingSystemApi_1._0.Exceptions;
 using LabelPrintingSystemApi_1._0.Models.Contexts;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
 {
@@ -10,6 +12,11 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
     {
         private readonly DatabaseContext databaseContext;
         private readonly ILogger<PrintJobService> logger;
+
+        private static readonly JsonSerializerOptions labelDataJsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
         public PrintJobService(
             DatabaseContext databaseContext,
@@ -66,76 +73,109 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
 
         public async Task<PrintJobDetailsDto> GetPrintJobByIdAsync(int printJobId)
         {
-            PrintJobDetailsDto? printJob = await databaseContext.PrintJobs
+            var result = await databaseContext.PrintJobs
                 .AsNoTracking()
-                .Where((printJob) => printJob.PrintJobId == printJobId)
-                .Select((printJob) => new PrintJobDetailsDto
+                .Where(printJob => printJob.PrintJobId == printJobId)
+                .Select(printJob => new
                 {
-                    PrintJobId = printJob.PrintJobId,
-                    LabelId = printJob.LabelId,
+                    LabelDataJson = printJob.Label.LabelDataJson,
 
-                    LabelType = printJob.Label.LabelType,
+                    Details = new PrintJobDetailsDto
+                    {
+                        PrintJobId = printJob.PrintJobId,
+                        LabelId = printJob.LabelId,
 
-                    ProductCode = printJob.Label.Product != null
-                        ? printJob.Label.Product.ProductCode
-                        : null,
+                        LabelType = printJob.Label.LabelType,
 
-                    ProductName = printJob.Label.Product != null
-                        ? printJob.Label.Product.Name
-                        : null,
+                        ProductCode = printJob.Label.Product != null
+                            ? printJob.Label.Product.ProductCode
+                            : null,
 
-                    PrimaryCodeValue = printJob.Label.PrimaryCodeValue,
+                        ProductName = printJob.Label.Product != null
+                            ? printJob.Label.Product.Name
+                            : null,
 
-                    TemplateName = printJob.Label.LabelTemplate.Name,
+                        PrimaryCodeValue = printJob.Label.PrimaryCodeValue,
 
-                    PrinterName = printJob.Printer.Name,
+                        TemplateName = printJob.Label.LabelTemplate.Name,
 
-                    Copies = printJob.Copies,
+                        PrinterName = printJob.Printer.Name,
 
-                    Status = printJob.Status,
+                        Copies = printJob.Copies,
 
-                    IsReprint = printJob.IsReprint,
+                        Status = printJob.Status,
 
-                    ErrorMessage = printJob.ErrorMessage,
+                        IsReprint = printJob.IsReprint,
 
-                    CreatedByUserName = printJob.CreatedByUser.FullName,
+                        ErrorMessage = printJob.ErrorMessage,
 
-                    CreatedAt = printJob.CreatedAt,
+                        CreatedByUserName = printJob.CreatedByUser.FullName,
 
-                    ModifiedByUserName = printJob.ModifiedByUser != null
-                        ? printJob.ModifiedByUser.FullName
-                        : null,
+                        CreatedAt = printJob.CreatedAt,
 
-                    ModifiedAt = printJob.ModifiedAt,
+                        ModifiedByUserName = printJob.ModifiedByUser != null
+                            ? printJob.ModifiedByUser.FullName
+                            : null,
 
-                    History = printJob.PrintJobHistories
-                        .OrderByDescending((history) => history.CreatedAt)
-                        .Select((history) => new PrintJobHistoryDto
-                        {
-                            CreatedAt = history.CreatedAt,
-                            Status = history.Status,
-                            ErrorMessage = history.ErrorMessage,
-                            Note = history.Note,
-                        })
-                        .ToList(),
+                        ModifiedAt = printJob.ModifiedAt,
+
+                        History = printJob.PrintJobHistories
+                            .OrderByDescending(history => history.CreatedAt)
+                            .Select(history => new PrintJobHistoryDto
+                            {
+                                CreatedAt = history.CreatedAt,
+                                Status = history.Status,
+                                ErrorMessage = history.ErrorMessage,
+                                Note = history.Note,
+                            })
+                            .ToList(),
+                    }
                 })
                 .FirstOrDefaultAsync();
 
-            if (printJob == null)
+            if (result == null)
             {
                 throw new NotFoundException(
                     $"Nie znaleziono zadania wydruku o ID {printJobId}."
                 );
             }
 
+            PrintEanLabelDataDto? labelData =
+                DeserializeLabelData(result.LabelDataJson);
+
+            result.Details.LabelData = labelData;
+
             logger.LogInformation(
                 "Pobrano szczegóły zadania wydruku o ID {PrintJobId}.",
                 printJobId
             );
 
-            return printJob;
+            return result.Details;
         }
 
+        private PrintEanLabelDataDto? DeserializeLabelData(string? labelDataJson)
+        {
+            if (string.IsNullOrWhiteSpace(labelDataJson))
+            {
+                return null;
+            }
 
+            try
+            {
+                return JsonSerializer.Deserialize<PrintEanLabelDataDto>(
+                    labelDataJson,
+                    labelDataJsonOptions
+                );
+            }
+            catch (JsonException exception)
+            {
+                logger.LogWarning(
+                    exception,
+                    "Could not deserialize LabelDataJson."
+                );
+
+                return null;
+            }
+        }
     }
 }

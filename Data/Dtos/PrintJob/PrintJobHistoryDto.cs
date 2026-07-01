@@ -6,7 +6,7 @@ namespace Data.Dtos.PrintJob
     {
         public DateTime CreatedAt { get; set; }
 
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; set; } = null!;
 
         public string? ErrorMessage { get; set; }
 
