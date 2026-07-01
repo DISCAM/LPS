@@ -93,7 +93,9 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintLabel
                 Ean = product.Ean,
                 Gtin = product.Gtin,
                 LabelTemplateId = labelTemplate.LabelTemplateId,
-                TemplateName = labelTemplate.Name
+                TemplateName = labelTemplate.Name,
+                TemplateReference = labelTemplate.TemplateReference,
+                TemplateVersionNo = labelTemplate.VersionNo,
             };
 
             string labelDataJson = JsonSerializer.Serialize(

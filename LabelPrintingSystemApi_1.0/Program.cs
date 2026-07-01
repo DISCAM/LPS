@@ -2,6 +2,7 @@ using LabelPrintingSystemApi_1._0.Middleware;
 using LabelPrintingSystemApi_1._0.Models.Contexts;
 using LabelPrintingSystemApi_1._0.OpenApi;
 using LabelPrintingSystemApi_1._0.Services.Auth;
+using LabelPrintingSystemApi_1._0.Services.Dispatchers;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using LabelPrintingSystemApi_1._0.Services.Kartoteki;
 using LabelPrintingSystemApi_1._0.Services.Konfiguracja;
@@ -114,8 +115,12 @@ builder.Services.AddScoped<ILabelTemplateService, LabelTemplateService>();
 builder.Services.AddScoped<IPrintLabelService, PrintLabelService>();
 builder.Services.AddScoped<IPrintJobService, PrintJobService>();
 
-
-
+builder.Services
+    .AddHttpClient<IPrintJobDispatcher, NiceLabelPrintJobDispatcher>()
+    .ConfigureHttpClient(client =>
+    {
+        client.Timeout = TimeSpan.FromSeconds(15);
+    });
 
 
 var app = builder.Build();
