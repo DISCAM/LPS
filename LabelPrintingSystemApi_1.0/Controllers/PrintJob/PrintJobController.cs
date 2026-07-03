@@ -13,10 +13,12 @@ namespace LabelPrintingSystemApi_1._0.Controllers.PrintJobs
     public class PrintJobController : ControllerBase
     {
         private readonly IPrintJobService printJobService;
+        private readonly IPrintJobPreviewDispatcher printJobPreviewDispatcher;
 
-        public PrintJobController(IPrintJobService printJobService)
+        public PrintJobController(IPrintJobService printJobService, IPrintJobPreviewDispatcher printJobPreviewDispatcher)
         {
             this.printJobService = printJobService;
+            this.printJobPreviewDispatcher = printJobPreviewDispatcher;
         }
 
         [HttpGet]
@@ -36,6 +38,20 @@ namespace LabelPrintingSystemApi_1._0.Controllers.PrintJobs
 
             return Ok(printJob);
         }
+
+        [HttpGet]
+        [Route(Urls.PRINT_JOBS_PREVIEW)]
+        public async Task<IActionResult> GetPrintJobPreviewByIdAsync([FromRoute] int id)
+        {
+            string previewFilePath =
+                await printJobPreviewDispatcher.GetPreviewPathAsync(id);
+
+            return PhysicalFile(
+                previewFilePath,
+                "image/png"
+            );
+        }
+
 
         [HttpPatch]
         [Route(Urls.PRINT_JOBS_CANCEL)]
@@ -75,6 +91,33 @@ namespace LabelPrintingSystemApi_1._0.Controllers.PrintJobs
 
             return StatusCode(StatusCodes.Status201Created, result);
         }
+
+        [HttpPost]
+        [Route(Urls.PRINT_JOBS_PRINT)]
+        public async Task<IActionResult> ExecutePrintJobByIdAsync([FromRoute] int id)
+        {
+            string? identityUserId = User
+                .FindFirst(ClaimTypes.NameIdentifier)
+                ?.Value;
+
+            if (string.IsNullOrWhiteSpace(identityUserId))
+            {
+                return Unauthorized();
+            }
+
+            await printJobService.ExecutePrintJobAsync(
+                id,
+                identityUserId
+            );
+
+            // Od razu zwracamy aktualny stan po wysłaniu do NiceLabel:
+            // SENT albo ERROR.
+            PrintJobDetailsDto updatedPrintJob =
+                await printJobService.GetPrintJobByIdAsync(id);
+
+            return Ok(updatedPrintJob);
+        }
+
 
 
 

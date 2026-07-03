@@ -115,6 +115,7 @@ builder.Services.AddScoped<ILabelTemplateService, LabelTemplateService>();
 builder.Services.AddScoped<IPrintLabelService, PrintLabelService>();
 builder.Services.AddScoped<IPrintJobService, PrintJobService>();
 
+//wydruk etykiety do NL
 builder.Services
     .AddHttpClient<IPrintJobDispatcher, NiceLabelPrintJobDispatcher>()
     .ConfigureHttpClient(client =>
@@ -122,6 +123,13 @@ builder.Services
         client.Timeout = TimeSpan.FromSeconds(15);
     });
 
+//podglad etykiety do NL 
+builder.Services
+    .AddHttpClient<IPrintJobPreviewDispatcher, NiceLabelPrintJobPreviewDispatcher>()
+    .ConfigureHttpClient(client =>
+    {
+        client.Timeout = TimeSpan.FromSeconds(30);
+    });
 
 var app = builder.Build();
 

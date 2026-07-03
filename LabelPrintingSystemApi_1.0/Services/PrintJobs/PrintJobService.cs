@@ -12,6 +12,7 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
     public class PrintJobService : IPrintJobService
     {
         private readonly DatabaseContext databaseContext;
+        private readonly IPrintJobDispatcher printJobDispatcher;
         private readonly ILogger<PrintJobService> logger;
 
         private static readonly JsonSerializerOptions labelDataJsonOptions = new()
@@ -21,11 +22,13 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
 
         public PrintJobService(
             DatabaseContext databaseContext,
-            ILogger<PrintJobService> logger
+            ILogger<PrintJobService> logger, 
+            IPrintJobDispatcher printJobDispatcher
         )
         {
             this.databaseContext = databaseContext;
             this.logger = logger;
+            this.printJobDispatcher = printJobDispatcher;
         }
 
         public async Task<List<PrintJobListDto>> GetAllPrintJobsAsync()
@@ -219,6 +222,7 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
                 );
 
             bool canBeReprinted =
+                sourcePrintJob.Status == "SENT" ||
                 sourcePrintJob.Status == "PRINTED" ||
                 sourcePrintJob.Status == "ERROR" ||
                 sourcePrintJob.Status == "CANCELLED";
@@ -227,7 +231,7 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
             {
                 throw new BadRequestException(
                     "Reprint można utworzyć wyłącznie dla zadania " +
-                    "ze statusem PRINTED, ERROR lub CANCELLED."
+                    "ze statusem SEND, PRINTED, ERROR lub CANCELLED."
                 );
             }
 
@@ -313,6 +317,39 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
 
                 throw;
             }
+        }
+
+        public async Task ExecutePrintJobAsync(int printJobId, string identityUserId)
+        {
+            User currentUser = await databaseContext.Users
+                .FirstOrDefaultAsync(user =>
+                    user.IdentityUserId == identityUserId &&
+                    user.IsActive)
+                ?? throw new NotFoundException(
+                    "Nie znaleziono aktywnego użytkownika."
+                );
+
+            PrintJob printJob = await databaseContext.PrintJobs
+                .FirstOrDefaultAsync(job =>
+                    job.PrintJobId == printJobId)
+                ?? throw new NotFoundException(
+                    $"Nie znaleziono zadania wydruku o ID {printJobId}."
+                );
+
+            if (printJob.Status != "QUEUED")
+            {
+                throw new BadRequestException(
+                    "Można drukować wyłącznie zadanie ze statusem QUEUED."
+                );
+            }
+
+            // Zapisujemy, kto rzeczywiście uruchomił fizyczny wydruk.
+            // Dispatcher później zmieni status na SENT albo ERROR.
+            printJob.ModifiedByUserId = currentUser.UserId;
+            printJob.ModifiedAt = DateTime.UtcNow;
+
+            await databaseContext.SaveChangesAsync();
+            await printJobDispatcher.DispatchPrintJobAsync(printJobId);
         }
 
 

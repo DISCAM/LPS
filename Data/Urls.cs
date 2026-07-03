@@ -61,5 +61,8 @@ namespace Data
         public const string PRINT_JOBS_ID = "print-jobs/{id}";
         public const string PRINT_JOBS_CANCEL = "print-jobs/{id}/cancel";
         public const string PRINT_JOBS_REPRINT = "print-jobs/{id}/reprint";
+        public const string PRINT_JOBS_PRINT = "print-jobs/{id}/print";
+        public const string PRINT_JOBS_PREVIEW = "print-jobs/{id}/preview";
+
     }
 }

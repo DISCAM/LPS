@@ -118,9 +118,9 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
 
                 ProductCode = labelData.ProductCode,
                 ProductName = labelData.ProductName,
-                Description = labelData.Description,
+                Description = labelData.Description ?? string.Empty,
                 Ean = labelData.Ean,
-                Gtin = labelData.Gtin,
+                Gtin = labelData.Gtin ?? string.Empty,
             };
 
             try

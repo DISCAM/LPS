@@ -7,7 +7,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Interfaces
         Task<List<PrintJobListDto>> GetAllPrintJobsAsync();
         Task<PrintJobDetailsDto> GetPrintJobByIdAsync(int printJobId);
         Task CancelPrintJobAsync(int printJobId, string identityUserId);
-
         Task<ReprintPrintJobResultDto> ReprintPrintJobAsync(int printJobId, string identityUserId);
+        Task ExecutePrintJobAsync(int printJobId, string identityUserId);
     }
 }
