@@ -8,7 +8,7 @@ namespace LabelPrintingSystemApi_1._0.Controllers.Auth
 {
     [ApiController]
     [Authorize(Roles = "SuperAdmin")]
-    public class UserController : BaseController
+    public class UserController : ControllerBase
     {
         private readonly IUserService service;  // pole klasy
         private readonly ILogger<UserController> logger;

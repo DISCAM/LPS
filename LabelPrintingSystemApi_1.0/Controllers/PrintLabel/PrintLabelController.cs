@@ -1,5 +1,6 @@
 ﻿using Data;
 using Data.Dtos.PrintLabel;
+using LabelPrintingSystemApi_1._0.Controllers;
 using LabelPrintingSystemApi_1._0.Models;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;

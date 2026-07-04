@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 namespace LabelPrintingSystemApi_1._0.Controllers.Auth
 {
-    public class AuthController : BaseController
+    [ApiController]
+    public class AuthController : ControllerBase
     {
         private readonly IAuthService authService;
+
+       
         public AuthController(IAuthService authService)
         {
             this.authService = authService;

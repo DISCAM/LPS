@@ -64,5 +64,10 @@ namespace Data
         public const string PRINT_JOBS_PRINT = "print-jobs/{id}/print";
         public const string PRINT_JOBS_PREVIEW = "print-jobs/{id}/preview";
 
+        // production orders 
+
+        public const string PRODUCTION_ORDERS = "production-orders";
+        public const string PRODUCTION_ORDERS_ID = "production-orders/{id}";
+
     }
 }
