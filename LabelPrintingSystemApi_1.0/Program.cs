@@ -8,6 +8,7 @@ using LabelPrintingSystemApi_1._0.Services.Kartoteki;
 using LabelPrintingSystemApi_1._0.Services.Konfiguracja;
 using LabelPrintingSystemApi_1._0.Services.PrintJobs;
 using LabelPrintingSystemApi_1._0.Services.PrintLabel;
+using LabelPrintingSystemApi_1._0.Services.ProductionLots;
 using LabelPrintingSystemApi_1._0.Services.ProductionOrders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -117,6 +118,7 @@ builder.Services.AddScoped<ILabelTemplateService, LabelTemplateService>();
 builder.Services.AddScoped<IPrintLabelService, PrintLabelService>();
 builder.Services.AddScoped<IPrintJobService, PrintJobService>();
 builder.Services.AddScoped<IProductionOrdersService, ProductionOrdersService>();
+builder.Services.AddScoped<IProductionLotsService, ProductionLotsService>();
 
 //wydruk etykiety do NL
 builder.Services
