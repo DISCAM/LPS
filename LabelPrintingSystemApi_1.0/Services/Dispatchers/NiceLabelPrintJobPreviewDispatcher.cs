@@ -81,8 +81,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                 );
             }
 
-            PrintEanLabelDataDto? labelData =
-                DeserializeLabelData(labelDataJson);
+            PrintProductionLabelDataDto? labelData = DeserializeLabelData(labelDataJson);
 
             if (labelData == null)
             {
@@ -125,6 +124,25 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                 Ean = labelData.Ean,
                 Gtin = labelData.Gtin,
             };
+
+            bool isProductionLabel = printJob.Label.LabelType == "PRODUCTION";
+
+            if (isProductionLabel)
+            {
+                previewDispatchDto.ProductionOrderNumber = labelData.ProductionOrderNumber;
+
+                previewDispatchDto.LotNumber = labelData.LotNumber;
+
+                previewDispatchDto.ProductionDate = labelData.ProductionDate;
+
+                previewDispatchDto.ExpirationDate = labelData.ExpirationDate;
+
+                previewDispatchDto.ProductionLine = labelData.ProductionLine;
+
+                previewDispatchDto.ShiftCode = labelData.ShiftCode;
+
+                previewDispatchDto.ProducedQuantity = labelData.ProducedQuantity;
+            }
 
             try
             {
@@ -195,13 +213,11 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
             }
         }
 
-        private PrintEanLabelDataDto? DeserializeLabelData(
-            string labelDataJson
-        )
+        private PrintProductionLabelDataDto? DeserializeLabelData(string labelDataJson)
         {
             try
             {
-                return JsonSerializer.Deserialize<PrintEanLabelDataDto>(
+                return JsonSerializer.Deserialize<PrintProductionLabelDataDto>(
                     labelDataJson,
                     labelDataJsonOptions
                 );
