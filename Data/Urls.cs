@@ -54,6 +54,7 @@ namespace Data
         // print label 
 
         public const string PRINT_EAN = "/print-ean";
+        public const string PRINT_PRODUCTION_LABEL = "/print-production-label";
 
         // print Job
 

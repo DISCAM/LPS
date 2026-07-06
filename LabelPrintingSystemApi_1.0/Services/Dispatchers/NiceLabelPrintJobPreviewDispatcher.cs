@@ -10,8 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
 {
-    public class NiceLabelPrintJobPreviewDispatcher
-        : IPrintJobPreviewDispatcher
+    public class NiceLabelPrintJobPreviewDispatcher : IPrintJobPreviewDispatcher
     {
         private static readonly JsonSerializerOptions labelDataJsonOptions = new()
         {

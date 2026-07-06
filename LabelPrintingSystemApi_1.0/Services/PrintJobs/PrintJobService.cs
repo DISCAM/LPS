@@ -144,9 +144,14 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
                 );
             }
 
-            PrintEanLabelDataDto? labelData =
-                DeserializeLabelData(result.LabelDataJson);
+            //PrintEanLabelDataDto? labelData =
+            //    DeserializeLabelData(result.LabelDataJson);
 
+            //zmieniamy zgodnie z tym co w DTO 
+
+            object? labelData = DeserializeLabelData(result.Details.LabelType, result.LabelDataJson);
+
+           
             result.Details.LabelData = labelData;
 
             logger.LogInformation(
@@ -353,7 +358,7 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
         }
 
 
-        private PrintEanLabelDataDto? DeserializeLabelData(string? labelDataJson)
+        private object? DeserializeLabelData(string labelType, string? labelDataJson)
         {
             if (string.IsNullOrWhiteSpace(labelDataJson))
             {
@@ -362,6 +367,14 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
 
             try
             {
+                if (labelType == "PRODUCTION")
+                {
+                    return JsonSerializer.Deserialize<PrintProductionLabelDataDto>(
+                        labelDataJson,
+                        labelDataJsonOptions
+                    );
+                }
+
                 return JsonSerializer.Deserialize<PrintEanLabelDataDto>(
                     labelDataJson,
                     labelDataJsonOptions

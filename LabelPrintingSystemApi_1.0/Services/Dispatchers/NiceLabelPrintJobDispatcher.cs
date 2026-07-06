@@ -66,8 +66,12 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                 return;
             }
 
-            PrintEanLabelDataDto? labelData =
-                DeserializeLabelData(labelDataJson);
+            //PrintEanLabelDataDto? labelData =
+            //    DeserializeLabelData(labelDataJson);
+
+            // zmioeniamy na ogulny wydruk 
+
+            PrintProductionLabelDataDto? labelData = DeserializeLabelData(labelDataJson);
 
             if (labelData == null)
             {
@@ -103,6 +107,8 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                 return;
             }
 
+            bool isProductionLabel = printJob.Label.LabelType == "PRODUCTION";
+
             PrintJobDispatchDto dispatchDto = new()
             {
                 PrintJobId = printJob.PrintJobId,
@@ -122,6 +128,23 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                 Ean = labelData.Ean,
                 Gtin = labelData.Gtin ?? string.Empty,
             };
+
+            if (isProductionLabel)
+            {
+                dispatchDto.ProductionOrderNumber = labelData.ProductionOrderNumber;
+
+                dispatchDto.LotNumber = labelData.LotNumber;
+
+                dispatchDto.ProductionDate = labelData.ProductionDate;
+
+                dispatchDto.ExpirationDate = labelData.ExpirationDate;
+
+                dispatchDto.ProductionLine = labelData.ProductionLine;
+
+                dispatchDto.ShiftCode = labelData.ShiftCode;
+
+                dispatchDto.ProducedQuantity = labelData.ProducedQuantity;
+            }
 
             try
             {
@@ -189,13 +212,11 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
             }
         }
 
-        private PrintEanLabelDataDto? DeserializeLabelData(
-            string labelDataJson
-        )
+        private PrintProductionLabelDataDto? DeserializeLabelData(string labelDataJson)
         {
             try
             {
-                return JsonSerializer.Deserialize<PrintEanLabelDataDto>(
+                return JsonSerializer.Deserialize<PrintProductionLabelDataDto>(
                     labelDataJson,
                     labelDataJsonOptions
                 );

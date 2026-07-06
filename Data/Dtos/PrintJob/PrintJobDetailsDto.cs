@@ -37,7 +37,11 @@ namespace Data.Dtos.PrintJob
 
         public DateTime? ModifiedAt { get; set; }
 
-        public PrintEanLabelDataDto? LabelData { get; set; }
+        //public PrintEanLabelDataDto? LabelData { get; set; }
+
+        // zmieniamy pod bardziej uniwersalny wydruk - PRODUCT to EAN PRODUCTION to Lot itd
+        public object? LabelData { get; set; }
+
         public List<PrintJobHistoryDto> History { get; set; } = [];
     }
 }

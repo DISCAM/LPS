@@ -40,4 +40,24 @@ public class PrintLabelController : ControllerBase
 
         return Ok(result);
     }
+
+    [Authorize(Roles = "SuperAdmin,Admin,Operator")]
+    [HttpPost]
+    [Route(Urls.PRINT_PRODUCTION_LABEL)]
+    public async Task<IActionResult> PrintProductionLabelAsync([FromBody] PrintProductionLabelDto dto)
+    {
+        string? identityUserId = User.FindFirstValue(
+            ClaimTypes.NameIdentifier
+        );
+
+        if (string.IsNullOrWhiteSpace(identityUserId))
+        {
+            return Unauthorized();
+        }
+
+        PrintResultDto result =
+            await printLabelService.PrintProductionLabelAsync(dto, identityUserId);
+
+        return Ok(result);
+    }
 }

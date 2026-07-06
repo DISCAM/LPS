@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Data.Dtos.Dispatchers
+﻿namespace Data.Dtos.Dispatchers
 {
     public class PrintJobDispatchDto
     {
@@ -31,5 +27,19 @@ namespace Data.Dtos.Dispatchers
         public string Ean { get; set; } = null!;
 
         public string? Gtin { get; set; }
+
+        public string? ProductionOrderNumber { get; set; }
+
+        public string? LotNumber { get; set; }
+
+        public DateOnly? ProductionDate { get; set; }
+
+        public DateOnly? ExpirationDate { get; set; }
+
+        public string? ProductionLine { get; set; }
+
+        public string? ShiftCode { get; set; }
+
+        public decimal? ProducedQuantity { get; set; }
     }
 }
