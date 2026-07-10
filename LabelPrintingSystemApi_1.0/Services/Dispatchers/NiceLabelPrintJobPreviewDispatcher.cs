@@ -38,7 +38,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
         public async Task<string> GetPreviewPathAsync(int printJobId)
         {
             string previewCacheDirectory =
-                configuration["NiceLabelAutomation:PreviewCacheDirectory"]
+                this.configuration["NiceLabelAutomation:PreviewCacheDirectory"]
                 ?? throw new InvalidOperationException(
                     "Brak konfiguracji NiceLabelAutomation:PreviewCacheDirectory."
                 );
@@ -54,7 +54,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
 
             if (File.Exists(previewFilePath))
             {
-                logger.LogInformation(
+                this.logger.LogInformation(
                     "Zwrócono istniejący podgląd dla PrintJob {PrintJobId}.",
                     printJobId
                 );
@@ -62,7 +62,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                 return previewFilePath;
             }
 
-            PrintJob printJob = await databaseContext.PrintJobs
+            PrintJob printJob = await this.databaseContext.PrintJobs
                 .AsNoTracking()
                 .Include(item => item.Label)
                 .FirstOrDefaultAsync(item =>
@@ -81,7 +81,10 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                 );
             }
 
-            PrintProductionLabelDataDto? labelData = DeserializeLabelData(labelDataJson);
+            PrintEanLabelDataDto? labelData = this.DeserializeLabelData(
+                printJob.Label.LabelType,
+                labelDataJson
+            );
 
             if (labelData == null)
             {
@@ -98,7 +101,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
             }
 
             string? previewTriggerUrl =
-                configuration["NiceLabelAutomation:PreviewTriggerUrl"];
+                this.configuration["NiceLabelAutomation:PreviewTriggerUrl"];
 
             if (string.IsNullOrWhiteSpace(previewTriggerUrl))
             {
@@ -125,29 +128,61 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                 Gtin = labelData.Gtin,
             };
 
-            bool isProductionLabel = printJob.Label.LabelType == "PRODUCTION";
-
-            if (isProductionLabel)
+            if (
+                printJob.Label.LabelType == "PRODUCTION" &&
+                labelData is PrintProductionLabelDataDto productionLabelData
+            )
             {
-                previewDispatchDto.ProductionOrderNumber = labelData.ProductionOrderNumber;
+                previewDispatchDto.ProductionOrderNumber =
+                    productionLabelData.ProductionOrderNumber;
 
-                previewDispatchDto.LotNumber = labelData.LotNumber;
+                previewDispatchDto.LotNumber =
+                    productionLabelData.LotNumber;
 
-                previewDispatchDto.ProductionDate = labelData.ProductionDate;
+                previewDispatchDto.ProductionDate =
+                    productionLabelData.ProductionDate;
 
-                previewDispatchDto.ExpirationDate = labelData.ExpirationDate;
+                previewDispatchDto.ExpirationDate =
+                    productionLabelData.ExpirationDate;
 
-                previewDispatchDto.ProductionLine = labelData.ProductionLine;
+                previewDispatchDto.ProductionLine =
+                    productionLabelData.ProductionLine;
 
-                previewDispatchDto.ShiftCode = labelData.ShiftCode;
+                previewDispatchDto.ShiftCode =
+                    productionLabelData.ShiftCode;
 
-                previewDispatchDto.ProducedQuantity = labelData.ProducedQuantity;
+                previewDispatchDto.ProducedQuantity =
+                    productionLabelData.ProducedQuantity;
+            }
+
+            if (
+                printJob.Label.LabelType == "LOGISTIC" &&
+                labelData is PrintLogisticLabelDataDto logisticLabelData
+            )
+            {
+                previewDispatchDto.Sscc =
+                    logisticLabelData.Sscc;
+
+                previewDispatchDto.UnitType =
+                    logisticLabelData.UnitType;
+
+                previewDispatchDto.LotNumber =
+                    logisticLabelData.LotNumber;
+
+                previewDispatchDto.ProductionDate =
+                    logisticLabelData.ProductionDate;
+
+                previewDispatchDto.ExpirationDate =
+                    logisticLabelData.ExpirationDate;
+
+                previewDispatchDto.Quantity =
+                    logisticLabelData.Quantity;
             }
 
             try
             {
                 using HttpResponseMessage response =
-                    await httpClient.PostAsJsonAsync(
+                    await this.httpClient.PostAsJsonAsync(
                         previewTriggerUrl,
                         previewDispatchDto
                     );
@@ -176,7 +211,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                     );
                 }
 
-                logger.LogInformation(
+                this.logger.LogInformation(
                     "Wygenerowano podgląd dla PrintJob {PrintJobId}.",
                     printJobId
                 );
@@ -185,7 +220,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
             }
             catch (HttpRequestException exception)
             {
-                logger.LogError(
+                this.logger.LogError(
                     exception,
                     "Nie udało się połączyć z NiceLabel Automation " +
                     "podczas generowania preview dla PrintJob {PrintJobId}.",
@@ -199,7 +234,7 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
             }
             catch (TaskCanceledException exception)
             {
-                logger.LogError(
+                this.logger.LogError(
                     exception,
                     "Przekroczono czas oczekiwania na preview " +
                     "dla PrintJob {PrintJobId}.",
@@ -213,18 +248,37 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
             }
         }
 
-        private PrintProductionLabelDataDto? DeserializeLabelData(string labelDataJson)
+        private PrintEanLabelDataDto? DeserializeLabelData(
+            string labelType,
+            string labelDataJson
+        )
         {
             try
             {
-                return JsonSerializer.Deserialize<PrintProductionLabelDataDto>(
+                if (labelType == "LOGISTIC")
+                {
+                    return JsonSerializer.Deserialize<PrintLogisticLabelDataDto>(
+                        labelDataJson,
+                        labelDataJsonOptions
+                    );
+                }
+
+                if (labelType == "PRODUCTION")
+                {
+                    return JsonSerializer.Deserialize<PrintProductionLabelDataDto>(
+                        labelDataJson,
+                        labelDataJsonOptions
+                    );
+                }
+
+                return JsonSerializer.Deserialize<PrintEanLabelDataDto>(
                     labelDataJson,
                     labelDataJsonOptions
                 );
             }
             catch (JsonException exception)
             {
-                logger.LogError(
+                this.logger.LogError(
                     exception,
                     "Nie udało się zdeserializować LabelDataJson."
                 );

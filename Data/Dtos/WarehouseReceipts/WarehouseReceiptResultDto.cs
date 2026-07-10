@@ -25,5 +25,11 @@ namespace Data.Dtos.WarehouseReceipts
         public string MovementType { get; set; } = null!;
 
         public string Status { get; set; } = null!;
+
+        public int LabelId { get; set; }
+
+        public int PrintJobId { get; set; }
+
+        public string PrintJobStatus { get; set; } = null!;
     }
 }

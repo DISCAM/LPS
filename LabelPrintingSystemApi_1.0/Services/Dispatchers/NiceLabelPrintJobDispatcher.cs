@@ -1,12 +1,12 @@
-﻿using Data.Dtos.Dispatchers;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
+using Data.Dtos.Dispatchers;
 using Data.Dtos.PrintLabel;
 using LabelPrintingSystemApi_1._0.Exceptions;
 using LabelPrintingSystemApi_1._0.Models;
 using LabelPrintingSystemApi_1._0.Models.Contexts;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-using System.Net.Http.Json;
 
 namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
 {
@@ -37,11 +37,12 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
 
         public async Task DispatchPrintJobAsync(int printJobId)
         {
-            PrintJob printJob = await databaseContext.PrintJobs
+            PrintJob printJob = await this.databaseContext.PrintJobs
                 .Include(item => item.Label)
                 .Include(item => item.Printer)
                 .FirstOrDefaultAsync(item =>
-                    item.PrintJobId == printJobId)
+                    item.PrintJobId == printJobId
+                )
                 ?? throw new NotFoundException(
                     $"Nie znaleziono zadania wydruku o ID {printJobId}."
                 );
@@ -49,65 +50,47 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
             if (printJob.Status != "QUEUED")
             {
                 throw new BadRequestException(
-                    "Można przekazać wyłącznie zadanie wydruku ze statusem QUEUED."
+                    "Do NiceLabel można wysłać tylko zadanie o statusie QUEUED."
                 );
             }
 
-            
             string? labelDataJson = printJob.Label.LabelDataJson;
 
             if (string.IsNullOrWhiteSpace(labelDataJson))
             {
-                await MarkAsErrorAsync(
-                    printJob,
+                throw new BadRequestException(
                     "Brak danych snapshotu etykiety."
                 );
-
-                return;
             }
 
-            //PrintEanLabelDataDto? labelData =
-            //    DeserializeLabelData(labelDataJson);
-
-            // zmioeniamy na ogulny wydruk 
-
-            PrintProductionLabelDataDto? labelData = DeserializeLabelData(labelDataJson);
+            PrintEanLabelDataDto? labelData = this.DeserializeLabelData(
+                printJob.Label.LabelType,
+                labelDataJson
+            );
 
             if (labelData == null)
             {
-                await MarkAsErrorAsync(
-                    printJob,
+                throw new BadRequestException(
                     "Nie udało się odczytać danych snapshotu etykiety."
                 );
-
-                return;
             }
-
 
             if (string.IsNullOrWhiteSpace(labelData.TemplateReference))
             {
-                await MarkAsErrorAsync(
-                    printJob,
+                throw new BadRequestException(
                     "Brak TemplateReference w snapshotcie etykiety."
                 );
-
-                return;
             }
 
-            string? triggerUrl =
-                configuration["NiceLabelAutomation:PrintTriggerUrl"];
+            string? printTriggerUrl =
+                this.configuration["NiceLabelAutomation:PrintTriggerUrl"];
 
-            if (string.IsNullOrWhiteSpace(triggerUrl))
+            if (string.IsNullOrWhiteSpace(printTriggerUrl))
             {
-                await MarkAsErrorAsync(
-                    printJob,
+                throw new InvalidOperationException(
                     "Brak konfiguracji NiceLabelAutomation:PrintTriggerUrl."
                 );
-
-                return;
             }
-
-            bool isProductionLabel = printJob.Label.LabelType == "PRODUCTION";
 
             PrintJobDispatchDto dispatchDto = new()
             {
@@ -120,37 +103,65 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
 
                 PrinterName = printJob.Printer.Name,
                 Copies = printJob.Copies,
-                IsReprint = printJob.IsReprint,
 
                 ProductCode = labelData.ProductCode,
                 ProductName = labelData.ProductName,
-                Description = labelData.Description ?? string.Empty,
+                Description = labelData.Description,
                 Ean = labelData.Ean,
-                Gtin = labelData.Gtin ?? string.Empty,
+                Gtin = labelData.Gtin,
             };
 
-            if (isProductionLabel)
+            if (
+                printJob.Label.LabelType == "PRODUCTION" &&
+                labelData is PrintProductionLabelDataDto productionLabelData
+            )
             {
-                dispatchDto.ProductionOrderNumber = labelData.ProductionOrderNumber;
+                dispatchDto.ProductionOrderNumber =
+                    productionLabelData.ProductionOrderNumber;
 
-                dispatchDto.LotNumber = labelData.LotNumber;
+                dispatchDto.LotNumber = productionLabelData.LotNumber;
 
-                dispatchDto.ProductionDate = labelData.ProductionDate;
+                dispatchDto.ProductionDate =
+                    productionLabelData.ProductionDate;
 
-                dispatchDto.ExpirationDate = labelData.ExpirationDate;
+                dispatchDto.ExpirationDate =
+                    productionLabelData.ExpirationDate;
 
-                dispatchDto.ProductionLine = labelData.ProductionLine;
+                dispatchDto.ProductionLine =
+                    productionLabelData.ProductionLine;
 
-                dispatchDto.ShiftCode = labelData.ShiftCode;
+                dispatchDto.ShiftCode =
+                    productionLabelData.ShiftCode;
 
-                dispatchDto.ProducedQuantity = labelData.ProducedQuantity;
+                dispatchDto.ProducedQuantity =
+                    productionLabelData.ProducedQuantity;
+            }
+
+            if (
+                printJob.Label.LabelType == "LOGISTIC" &&
+                labelData is PrintLogisticLabelDataDto logisticLabelData
+            )
+            {
+                dispatchDto.Sscc = logisticLabelData.Sscc;
+
+                dispatchDto.UnitType = logisticLabelData.UnitType;
+
+                dispatchDto.LotNumber = logisticLabelData.LotNumber;
+
+                dispatchDto.ProductionDate =
+                    logisticLabelData.ProductionDate;
+
+                dispatchDto.ExpirationDate =
+                    logisticLabelData.ExpirationDate;
+
+                dispatchDto.Quantity = logisticLabelData.Quantity;
             }
 
             try
             {
                 using HttpResponseMessage response =
-                    await httpClient.PostAsJsonAsync(
-                        triggerUrl,
+                    await this.httpClient.PostAsJsonAsync(
+                        printTriggerUrl,
                         dispatchDto
                     );
 
@@ -159,71 +170,108 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
                     string responseBody =
                         await response.Content.ReadAsStringAsync();
 
-                    string errorMessage =
+                    throw new InvalidOperationException(
                         $"NiceLabel Automation zwrócił HTTP " +
                         $"{(int)response.StatusCode} " +
-                        $"({response.ReasonPhrase}).";
-
-                    if (!string.IsNullOrWhiteSpace(responseBody))
-                    {
-                        errorMessage += $" Odpowiedź: {responseBody}";
-                    }
-
-                    await MarkAsErrorAsync(
-                        printJob,
-                        errorMessage
+                        $"({response.ReasonPhrase}). " +
+                        $"Odpowiedź: {responseBody}"
                     );
-
-                    return;
                 }
 
-                await MarkAsSentAsync(printJob);
+                DateTime now = DateTime.Now;
 
-                logger.LogInformation(
-                    "Zadanie wydruku {PrintJobId} zostało przekazane do NiceLabel Automation.",
+                printJob.Status = "SENT";
+                printJob.ErrorMessage = null;
+                printJob.ModifiedAt = now;
+
+                PrintJobHistory printJobHistory = new()
+                {
+                    PrintJobId = printJob.PrintJobId,
+                    Status = printJob.Status,
+                    Note = "Zadanie wydruku zostało wysłane do NiceLabel Automation.",
+                    CreatedAt = now,
+                };
+
+                await this.databaseContext.PrintJobHistories.AddAsync(
+                    printJobHistory
+                );
+
+                await this.databaseContext.SaveChangesAsync();
+
+                this.logger.LogInformation(
+                    "Wysłano PrintJob {PrintJobId} do NiceLabel Automation.",
                     printJob.PrintJobId
                 );
             }
             catch (HttpRequestException exception)
             {
-                await MarkAsErrorAsync(
+                await this.MarkPrintJobAsErrorAsync(
                     printJob,
-                    $"Nie udało się połączyć z NiceLabel Automation: {exception.Message}"
+                    "Nie udało się połączyć z NiceLabel Automation.",
+                    exception
                 );
 
-                logger.LogError(
-                    exception,
-                    "Błąd połączenia z NiceLabel Automation dla PrintJob {PrintJobId}.",
-                    printJob.PrintJobId
+                throw new InvalidOperationException(
+                    "Nie udało się połączyć z NiceLabel Automation.",
+                    exception
                 );
             }
             catch (TaskCanceledException exception)
             {
-                await MarkAsErrorAsync(
+                await this.MarkPrintJobAsErrorAsync(
                     printJob,
-                    $"Przekroczono czas oczekiwania na odpowiedź NiceLabel Automation: {exception.Message}"
+                    "Przekroczono czas oczekiwania na odpowiedź NiceLabel Automation.",
+                    exception
                 );
 
-                logger.LogError(
-                    exception,
-                    "Przekroczono czas oczekiwania dla PrintJob {PrintJobId}.",
-                    printJob.PrintJobId
+                throw new InvalidOperationException(
+                    "Przekroczono czas oczekiwania na odpowiedź NiceLabel Automation.",
+                    exception
                 );
+            }
+            catch (InvalidOperationException exception)
+            {
+                await this.MarkPrintJobAsErrorAsync(
+                    printJob,
+                    exception.Message,
+                    exception
+                );
+
+                throw;
             }
         }
 
-        private PrintProductionLabelDataDto? DeserializeLabelData(string labelDataJson)
+        private PrintEanLabelDataDto? DeserializeLabelData(
+            string labelType,
+            string labelDataJson
+        )
         {
             try
             {
-                return JsonSerializer.Deserialize<PrintProductionLabelDataDto>(
+                if (labelType == "LOGISTIC")
+                {
+                    return JsonSerializer.Deserialize<PrintLogisticLabelDataDto>(
+                        labelDataJson,
+                        labelDataJsonOptions
+                    );
+                }
+
+                if (labelType == "PRODUCTION")
+                {
+                    return JsonSerializer.Deserialize<PrintProductionLabelDataDto>(
+                        labelDataJson,
+                        labelDataJsonOptions
+                    );
+                }
+
+                return JsonSerializer.Deserialize<PrintEanLabelDataDto>(
                     labelDataJson,
                     labelDataJsonOptions
                 );
             }
             catch (JsonException exception)
             {
-                logger.LogError(
+                this.logger.LogError(
                     exception,
                     "Nie udało się zdeserializować LabelDataJson."
                 );
@@ -232,50 +280,38 @@ namespace LabelPrintingSystemApi_1._0.Services.Dispatchers
             }
         }
 
-        private async Task MarkAsSentAsync(PrintJob printJob)
-        {
-            DateTime changedAt = DateTime.UtcNow;
-
-            printJob.Status = "SENT";
-            printJob.ErrorMessage = null;
-            printJob.ModifiedAt = changedAt;
-
-            PrintJobHistory history = new()
-            {
-                PrintJobId = printJob.PrintJobId,
-                Status = "SENT",
-                CreatedAt = changedAt,
-                Note = "Zadanie przekazano do NiceLabel Automation.",
-            };
-
-            databaseContext.PrintJobHistories.Add(history);
-
-            await databaseContext.SaveChangesAsync();
-        }
-
-        private async Task MarkAsErrorAsync(
+        private async Task MarkPrintJobAsErrorAsync(
             PrintJob printJob,
-            string errorMessage
+            string errorMessage,
+            Exception exception
         )
         {
-            DateTime changedAt = DateTime.UtcNow;
+            this.logger.LogError(
+                exception,
+                "Błąd podczas wysyłania PrintJob {PrintJobId} do NiceLabel Automation.",
+                printJob.PrintJobId
+            );
+
+            DateTime now = DateTime.Now;
 
             printJob.Status = "ERROR";
             printJob.ErrorMessage = errorMessage;
-            printJob.ModifiedAt = changedAt;
+            printJob.ModifiedAt = now;
 
-            PrintJobHistory history = new()
+            PrintJobHistory printJobHistory = new()
             {
                 PrintJobId = printJob.PrintJobId,
-                Status = "ERROR",
+                Status = printJob.Status,
+                Note = "Wystąpił błąd podczas wysyłania zadania do NiceLabel Automation.",
                 ErrorMessage = errorMessage,
-                CreatedAt = changedAt,
-                Note = "Nie udało się przekazać zadania do NiceLabel Automation.",
+                CreatedAt = now,
             };
 
-            databaseContext.PrintJobHistories.Add(history);
+            await this.databaseContext.PrintJobHistories.AddAsync(
+                printJobHistory
+            );
 
-            await databaseContext.SaveChangesAsync();
+            await this.databaseContext.SaveChangesAsync();
         }
     }
 }

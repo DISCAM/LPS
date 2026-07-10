@@ -20,5 +20,14 @@ namespace Data.Dtos.WarehouseReceipts
 
         [MaxLength(255)]
         public string? Notes { get; set; }
+
+        [Required]
+        public int LabelTemplateId { get; set; }
+
+        [Required]
+        public int PrinterId { get; set; }
+
+        [Range(1, 999, ErrorMessage = "Liczba kopii musi być większa od 0.")]
+        public int Copies { get; set; } = 1;
     }
 }

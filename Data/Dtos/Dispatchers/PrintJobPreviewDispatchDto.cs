@@ -24,6 +24,8 @@
 
         public string? Gtin { get; set; }
 
+        //pola dla etykiet produkcyjnych 
+
         public string? ProductionOrderNumber { get; set; }
 
         public string? LotNumber { get; set; }
@@ -37,5 +39,19 @@
         public string? ShiftCode { get; set; }
 
         public decimal? ProducedQuantity { get; set; }
+
+        // pola dla etykiet logistycznych 
+
+        public int? LogisticUnitId { get; set; }
+
+        public string? Sscc { get; set; }
+
+        public string? UnitType { get; set; }
+
+        public int? ProductionLotId { get; set; }
+             
+
+        public decimal? Quantity { get; set; }
+
     }
 }

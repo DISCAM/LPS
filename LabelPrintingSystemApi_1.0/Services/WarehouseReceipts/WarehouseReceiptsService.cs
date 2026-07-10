@@ -1,4 +1,6 @@
-﻿using Data.Dtos.WarehouseReceipts;
+﻿using System.Text.Json;
+using Data.Dtos.PrintLabel;
+using Data.Dtos.WarehouseReceipts;
 using LabelPrintingSystemApi_1._0.Exceptions;
 using LabelPrintingSystemApi_1._0.Models;
 using LabelPrintingSystemApi_1._0.Models.Contexts;
@@ -9,7 +11,12 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
 {
     public class WarehouseReceiptsService : IWarehouseReceiptsService
     {
-        private const string RECEIPT_FROM_PRODUCTION = "PRODUCTION_RECEIPT";
+        private const string PRODUCTION_RECEIPT = "PRODUCTION_RECEIPT";
+
+        private static readonly JsonSerializerOptions labelDataJsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
 
         private readonly DatabaseContext databaseContext;
 
@@ -42,12 +49,39 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
                     $"Nie znaleziono partii produkcyjnej o ID {dto.ProductionLotId}."
                 );
 
-            if (!productionLot.ProductionOrder.Product.IsActive)
+            Product product = productionLot.ProductionOrder.Product;
+
+            if (!product.IsActive)
             {
                 throw new BadRequestException(
                     "Produkt przypisany do partii produkcyjnej jest nieaktywny."
                 );
             }
+
+            LabelTemplate labelTemplate = await this.databaseContext.LabelTemplates
+                .FirstOrDefaultAsync(item =>
+                    item.LabelTemplateId == dto.LabelTemplateId &&
+                    item.IsActive
+                )
+                ?? throw new NotFoundException(
+                    $"Nie znaleziono aktywnego szablonu etykiety o ID {dto.LabelTemplateId}."
+                );
+
+            if (labelTemplate.LabelType != "LOGISTIC")
+            {
+                throw new BadRequestException(
+                    "Wybrany szablon nie jest szablonem etykiety logistycznej."
+                );
+            }
+
+            Printer printer = await this.databaseContext.Printers
+                .FirstOrDefaultAsync(item =>
+                    item.PrinterId == dto.PrinterId &&
+                    item.IsActive
+                )
+                ?? throw new NotFoundException(
+                    $"Nie znaleziono aktywnej drukarki o ID {dto.PrinterId}."
+                );
 
             string unitType = dto.UnitType.Trim().ToUpperInvariant();
 
@@ -62,7 +96,7 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
             decimal alreadyReceivedQuantity = await this.databaseContext.StockMovements
                 .Where(item =>
                     item.ProductionLotId == productionLot.ProductionLotId &&
-                    item.MovementType == RECEIPT_FROM_PRODUCTION
+                    item.MovementType == PRODUCTION_RECEIPT
                 )
                 .SumAsync(item => (decimal?)item.Quantity) ?? 0m;
 
@@ -77,7 +111,8 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
                 );
             }
 
-            using var transaction = await this.databaseContext.Database.BeginTransactionAsync();
+            using var databaseTransaction =
+                await this.databaseContext.Database.BeginTransactionAsync();
 
             try
             {
@@ -118,7 +153,7 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
                     ProductionLotId = productionLot.ProductionLotId,
                     WarehouseOrderId = null,
                     LogisticUnitId = logisticUnit.LogisticUnitId,
-                    MovementType = RECEIPT_FROM_PRODUCTION,
+                    MovementType = PRODUCTION_RECEIPT,
                     Quantity = dto.Quantity,
                     Notes = dto.Notes,
                     CreatedByUserId = user.UserId,
@@ -129,7 +164,82 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
 
                 await this.databaseContext.SaveChangesAsync();
 
-                await transaction.CommitAsync();
+                PrintLogisticLabelDataDto labelData = new()
+                {
+                    ProductId = product.ProductId,
+                    ProductCode = product.ProductCode,
+                    ProductName = product.Name,
+                    Description = product.Description,
+                    Ean = product.Ean,
+                    Gtin = product.Gtin,
+
+                    TemplateReference = labelTemplate.TemplateReference,
+                    TemplateVersionNo = labelTemplate.VersionNo,
+
+                    LogisticUnitId = logisticUnit.LogisticUnitId,
+                    Sscc = logisticUnit.Sscc,
+                    UnitType = logisticUnit.UnitType,
+
+                    ProductionLotId = productionLot.ProductionLotId,
+                    LotNumber = productionLot.LotNumber,
+                    ProductionDate = productionLot.ProductionDate,
+                    ExpirationDate = productionLot.ExpirationDate,
+
+                    Quantity = dto.Quantity,
+                };
+
+                string labelDataJson = JsonSerializer.Serialize(
+                    labelData,
+                    labelDataJsonOptions
+                );
+
+                Label label = new()
+                {
+                    LabelType = "LOGISTIC",
+                    ProductId = product.ProductId,
+                    ProductionLotId = productionLot.ProductionLotId,
+                    LogisticUnitId = logisticUnit.LogisticUnitId,
+                    LabelTemplateId = labelTemplate.LabelTemplateId,
+                    PrimaryCodeValue = logisticUnit.Sscc,
+                    LabelDataJson = labelDataJson,
+                    CreatedByUserId = user.UserId,
+                    CreatedAt = now,
+                };
+
+                await this.databaseContext.Labels.AddAsync(label);
+
+                await this.databaseContext.SaveChangesAsync();
+
+                PrintJob printJob = new()
+                {
+                    LabelId = label.LabelId,
+                    PrinterId = printer.PrinterId,
+                    CreatedByUserId = user.UserId,
+                    Copies = dto.Copies,
+                    Status = "QUEUED",
+                    IsReprint = false,
+                    CreatedAt = now,
+                };
+
+                await this.databaseContext.PrintJobs.AddAsync(printJob);
+
+                await this.databaseContext.SaveChangesAsync();
+
+                PrintJobHistory printJobHistory = new()
+                {
+                    PrintJobId = printJob.PrintJobId,
+                    Status = printJob.Status,
+                    Note = "Utworzono zadanie wydruku etykiety logistycznej.",
+                    CreatedAt = now,
+                };
+
+                await this.databaseContext.PrintJobHistories.AddAsync(
+                    printJobHistory
+                );
+
+                await this.databaseContext.SaveChangesAsync();
+
+                await databaseTransaction.CommitAsync();
 
                 return new WarehouseReceiptResultDto
                 {
@@ -143,11 +253,14 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
                     UnitType = logisticUnit.UnitType,
                     MovementType = stockMovement.MovementType,
                     Status = logisticUnit.Status,
+                    LabelId = label.LabelId,
+                    PrintJobId = printJob.PrintJobId,
+                    PrintJobStatus = printJob.Status,
                 };
             }
             catch
             {
-                await transaction.RollbackAsync();
+                await databaseTransaction.RollbackAsync();
 
                 throw;
             }
