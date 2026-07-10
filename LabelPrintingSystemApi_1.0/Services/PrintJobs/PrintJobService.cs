@@ -367,6 +367,14 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
 
             try
             {
+                if (labelType == "LOGISTIC")
+                {
+                    return JsonSerializer.Deserialize<PrintLogisticLabelDataDto>(
+                        labelDataJson,
+                        labelDataJsonOptions
+                    );
+                }
+
                 if (labelType == "PRODUCTION")
                 {
                     return JsonSerializer.Deserialize<PrintProductionLabelDataDto>(
