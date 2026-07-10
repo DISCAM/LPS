@@ -6,6 +6,7 @@ using LabelPrintingSystemApi_1._0.Services.Dispatchers;
 using LabelPrintingSystemApi_1._0.Services.Interfaces;
 using LabelPrintingSystemApi_1._0.Services.Kartoteki;
 using LabelPrintingSystemApi_1._0.Services.Konfiguracja;
+using LabelPrintingSystemApi_1._0.Services.LogisticUnits;
 using LabelPrintingSystemApi_1._0.Services.PrintJobs;
 using LabelPrintingSystemApi_1._0.Services.PrintLabel;
 using LabelPrintingSystemApi_1._0.Services.ProductionLots;
@@ -123,6 +124,7 @@ builder.Services.AddScoped<IProductionOrdersService, ProductionOrdersService>();
 builder.Services.AddScoped<IProductionLotsService, ProductionLotsService>();
 builder.Services.AddScoped<IStockMovementsService, StockMovementsService>();
 builder.Services.AddScoped<IWarehouseReceiptsService, WarehouseReceiptsService>();
+builder.Services.AddScoped<ILogisticUnitsService, LogisticUnitsService>();
 
 //wydruk etykiety do NL
 builder.Services

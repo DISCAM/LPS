@@ -74,7 +74,7 @@ namespace Data
         // operacje magazynowe 
 
         public const string STOCK_MOVEMENTS = "stock-movements";
-
         public const string WAREHOUSE_RECEIPTS = "warehouse-receipts";
+        public const string LOGISTIC_UNITS = "logistic-units";
     }
 }
