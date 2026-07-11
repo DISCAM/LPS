@@ -83,6 +83,10 @@ namespace Data
         public const string WAREHOUSE_ORDERS_ID = "warehouse-orders/{id}";
         public const string WAREHOUSE_ORDERS_SHIP_LOGISTIC_UNIT = "warehouse-orders/{id}/ship-logistic-unit";
 
+        // dashboard 
+
+        public const string DASHBOARD_SUMMARY = "dashboard/summary";
+
 
     }
 }

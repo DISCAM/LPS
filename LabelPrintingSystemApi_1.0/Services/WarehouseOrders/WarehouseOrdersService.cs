@@ -49,97 +49,50 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseOrders
 
         public async Task<WarehouseOrderDetailsDto> GetByIdAsync(int id)
         {
-            WarehouseOrderDetailsDto? result =
-                await this.databaseContext.WarehouseOrders
-                    .AsNoTracking()
-                    .Where(item => item.WarehouseOrderId == id)
-                    .Select(item => new WarehouseOrderDetailsDto
-                    {
-                        WarehouseOrderId = item.WarehouseOrderId,
-                        OrderNumber = item.OrderNumber,
-                        OrderType = item.OrderType,
-                        Status = item.Status,
-                        DeliveryAddress = item.DeliveryAddress,
-                        CustomerId = item.CustomerId,
-                        CustomerName = item.Customer != null
+            WarehouseOrderDetailsDto? result = await this.databaseContext.WarehouseOrders
+                .AsNoTracking()
+                .Where(item => item.WarehouseOrderId == id)
+                .Select(item => new WarehouseOrderDetailsDto
+                {
+                    WarehouseOrderId = item.WarehouseOrderId,
+                    OrderNumber = item.OrderNumber,
+                    OrderType = item.OrderType,
+                    Status = item.Status,
+                    DeliveryAddress = item.DeliveryAddress,
+                    CustomerId = item.CustomerId,
+                    CustomerName = item.Customer != null
                             ? item.Customer.Name
                             : null,
-                        CreatedByUserId = item.CreatedByUserId,
-                        CreatedByUserName = item.CreatedByUser.FullName,
-                        CreatedAt = item.CreatedAt,
-                        ModifiedByUserId = item.ModifiedByUserId,
-                        ModifiedAt = item.ModifiedAt,
+                    CreatedByUserId = item.CreatedByUserId,
+                    CreatedByUserName = item.CreatedByUser.FullName,
+                    CreatedAt = item.CreatedAt,
+                    ModifiedByUserId = item.ModifiedByUserId,
+                    ModifiedAt = item.ModifiedAt,
 
-                        LogisticUnits = item.LogisticUnits
-                            .OrderByDescending(logisticUnit =>
-                                logisticUnit.CreatedAt
-                            )
-                            .Select(logisticUnit =>
-                                new WarehouseOrderLogisticUnitDto
-                                {
-                                    LogisticUnitId = logisticUnit.LogisticUnitId,
+                    LogisticUnits = item.LogisticUnits.OrderByDescending(logisticUnit => logisticUnit.CreatedAt)
+                    .Select(logisticUnit => new WarehouseOrderLogisticUnitDto{
 
-                                    Sscc = logisticUnit.Sscc,
-
-                                    UnitType = logisticUnit.UnitType,
-
-                                    Status = logisticUnit.Status,
-
-                                    CreatedAt = logisticUnit.CreatedAt,
-
-                                    TotalQuantity = logisticUnit
+                        LogisticUnitId = logisticUnit.LogisticUnitId,
+                        Sscc = logisticUnit.Sscc,
+                        UnitType = logisticUnit.UnitType,
+                        Status = logisticUnit.Status,
+                        CreatedAt = logisticUnit.CreatedAt,
+                        TotalQuantity = logisticUnit
                                         .LogisticUnitItems
                                         .Sum(logisticUnitItem => logisticUnitItem.Quantity),
-
-                                    Items = logisticUnit.LogisticUnitItems
-                                        .OrderBy(logisticUnitItem =>
-                                            logisticUnitItem
-                                                .LogisticUnitItemId
-                                        )
-                                        .Select(logisticUnitItem =>
-                                            new WarehouseOrderLogisticUnitItemDto
-                                            {
-                                                LogisticUnitItemId =
-                                                    logisticUnitItem
-                                                        .LogisticUnitItemId,
-
-                                                ProductionLotId =
-                                                    logisticUnitItem
-                                                        .ProductionLotId,
-
-                                                LotNumber =
-                                                    logisticUnitItem
-                                                        .ProductionLot
-                                                        .LotNumber,
-
-                                                ProductId =
-                                                    logisticUnitItem
-                                                        .ProductionLot
-                                                        .ProductionOrder
-                                                        .ProductId,
-
-                                                ProductCode =
-                                                    logisticUnitItem
-                                                        .ProductionLot
-                                                        .ProductionOrder
-                                                        .Product
-                                                        .ProductCode,
-
-                                                ProductName =
-                                                    logisticUnitItem
-                                                        .ProductionLot
-                                                        .ProductionOrder
-                                                        .Product
-                                                        .Name,
-
-                                                Quantity =
-                                                    logisticUnitItem
-                                                        .Quantity,
-                                            }
-                                        ).ToList(),
-                                }
-                            ).ToList(),
-                    }).FirstOrDefaultAsync();
+                        Items = logisticUnit.LogisticUnitItems.OrderBy(logisticUnitItem => logisticUnitItem.LogisticUnitItemId)
+                        .Select(logisticUnitItem => new WarehouseOrderLogisticUnitItemDto
+                        {
+                            LogisticUnitItemId = logisticUnitItem.LogisticUnitItemId,
+                            ProductionLotId = logisticUnitItem.ProductionLotId,
+                            LotNumber = logisticUnitItem.ProductionLot.LotNumber,
+                            ProductId = logisticUnitItem.ProductionLot.ProductionOrder.ProductId,
+                            ProductCode = logisticUnitItem.ProductionLot.ProductionOrder.Product.ProductCode,
+                            ProductName = logisticUnitItem.ProductionLot.ProductionOrder.Product.Name,
+                            Quantity = logisticUnitItem.Quantity,
+                        }).ToList(),
+                    }).ToList(),
+                }).FirstOrDefaultAsync();
 
             if (result == null)
             {
@@ -259,15 +212,20 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseOrders
                     );
                 }
 
-                LogisticUnit logisticUnit =
-                    await this.databaseContext.LogisticUnits
-                        .Include(item => item.LogisticUnitItems)
-                        .FirstOrDefaultAsync(item =>
-                            item.LogisticUnitId == dto.LogisticUnitId
-                        )
+                LogisticUnit logisticUnit = await this.databaseContext.LogisticUnits
+                    .Include(item => item.LogisticUnitItems)
+                    .ThenInclude(item => item.ProductionLot)
+                    .ThenInclude(item => item.ProductionOrder)
+                    .FirstOrDefaultAsync(item => item.LogisticUnitId == dto.LogisticUnitId)
                     ?? throw new NotFoundException(
-                        $"Nie znaleziono jednostki logistycznej o ID {dto.LogisticUnitId}."
+                        $"Nie znaleziono jednostki logistycznej o ID {dto.LogisticUnitId}.");
+                
+                if (!logisticUnit.LogisticUnitItems.Any())
+                {
+                    throw new BadRequestException(
+                        "Jednostka logistyczna nie ma żadnej zawartości."
                     );
+                }
 
                 if (logisticUnit.Status == LOGISTIC_UNIT_STATUS_SHIPPED)
                 {

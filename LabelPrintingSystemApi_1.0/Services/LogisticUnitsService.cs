@@ -46,26 +46,22 @@ namespace LabelPrintingSystemApi_1._0.Services.LogisticUnits
                         .Select(logisticUnitItem => new LogisticUnitItemDto
                         {
                             LogisticUnitItemId = logisticUnitItem.LogisticUnitItemId,
-
                             ProductionLotId = logisticUnitItem.ProductionLotId,
-
                             LotNumber = logisticUnitItem.ProductionLot.LotNumber,
-
                             ProductionDate = logisticUnitItem.ProductionLot.ProductionDate,
-
                             ExpirationDate = logisticUnitItem.ProductionLot.ExpirationDate,
-
                             ProductId = logisticUnitItem.ProductionLot.ProductionOrder.ProductId,
-
                             ProductCode = logisticUnitItem.ProductionLot.ProductionOrder.Product.ProductCode,
-
                             ProductName = logisticUnitItem.ProductionLot.ProductionOrder.Product.Name,
-
                             Quantity = logisticUnitItem.Quantity,
-
                             WarehouseOrderItemId = logisticUnitItem.WarehouseOrderItemId,
-
                             CreatedAt = logisticUnitItem.CreatedAt,
+                            ProductionOrderId = logisticUnitItem.ProductionLot.ProductionOrderId,
+                            ProductionOrderNumber = logisticUnitItem.ProductionLot.ProductionOrder.OrderNumber,
+                            ProductionOrderCustomerId = logisticUnitItem.ProductionLot.ProductionOrder.CustomerId,
+                            ProductionOrderCustomerName = logisticUnitItem.ProductionLot.ProductionOrder.Customer != null
+                            ? logisticUnitItem.ProductionLot.ProductionOrder.Customer.Name : null,
+
                         }).ToList(),
                 }).ToListAsync();
         }

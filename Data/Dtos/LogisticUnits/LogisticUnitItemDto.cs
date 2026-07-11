@@ -22,6 +22,14 @@ namespace Data.Dtos.LogisticUnits
 
         public string ProductName { get; set; } = null!;
 
+        public int ProductionOrderId { get; set; }
+
+        public string ProductionOrderNumber { get; set; } = null!;
+
+        public int? ProductionOrderCustomerId { get; set; }
+
+        public string? ProductionOrderCustomerName { get; set; }
+
         public decimal Quantity { get; set; }
 
         public int? WarehouseOrderItemId { get; set; }
