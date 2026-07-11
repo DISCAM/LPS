@@ -71,10 +71,18 @@ namespace Data
         public const string PRODUCTION_ORDERS_ID = "production-orders/{id}";
         public const string PRODUCTION_ORDER_LOTS = "production-orders/{productionOrderId}/production-lots";
 
-        // operacje magazynowe 
+        // operacje produkcyjno magazynowe / przesuniecia na produkcje etykiety sscc 
 
         public const string STOCK_MOVEMENTS = "stock-movements";
         public const string WAREHOUSE_RECEIPTS = "warehouse-receipts";
         public const string LOGISTIC_UNITS = "logistic-units";
+        
+        // operacje typowo magazynowe 
+
+        public const string WAREHOUSE_ORDERS = "warehouse-orders";
+        public const string WAREHOUSE_ORDERS_ID = "warehouse-orders/{id}";
+        public const string WAREHOUSE_ORDERS_SHIP_LOGISTIC_UNIT = "warehouse-orders/{id}/ship-logistic-unit";
+
+
     }
 }

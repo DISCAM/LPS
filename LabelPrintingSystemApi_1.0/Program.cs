@@ -12,6 +12,7 @@ using LabelPrintingSystemApi_1._0.Services.PrintLabel;
 using LabelPrintingSystemApi_1._0.Services.ProductionLots;
 using LabelPrintingSystemApi_1._0.Services.ProductionOrders;
 using LabelPrintingSystemApi_1._0.Services.StockMovements;
+using LabelPrintingSystemApi_1._0.Services.WarehouseOrders;
 using LabelPrintingSystemApi_1._0.Services.WarehouseReceipts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -125,6 +126,7 @@ builder.Services.AddScoped<IProductionLotsService, ProductionLotsService>();
 builder.Services.AddScoped<IStockMovementsService, StockMovementsService>();
 builder.Services.AddScoped<IWarehouseReceiptsService, WarehouseReceiptsService>();
 builder.Services.AddScoped<ILogisticUnitsService, LogisticUnitsService>();
+builder.Services.AddScoped<IWarehouseOrdersService, WarehouseOrdersService>();
 
 //wydruk etykiety do NL
 builder.Services
