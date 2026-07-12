@@ -15,10 +15,12 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseOrders
         private const string LOGISTIC_UNIT_STATUS_SHIPPED = "SHIPPED";
         private const string STOCK_MOVEMENT_TYPE_SHIPMENT = "SHIPMENT";
         private readonly DatabaseContext databaseContext;
+        private readonly IAuditLogService auditLogService;
 
-        public WarehouseOrdersService(DatabaseContext databaseContext)
+        public WarehouseOrdersService(DatabaseContext databaseContext, IAuditLogService auditLogService)
         {
             this.databaseContext = databaseContext;
+            this.auditLogService = auditLogService;
         }
 
         public async Task<List<WarehouseOrderDto>> GetAllAsync()
@@ -77,9 +79,7 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseOrders
                         UnitType = logisticUnit.UnitType,
                         Status = logisticUnit.Status,
                         CreatedAt = logisticUnit.CreatedAt,
-                        TotalQuantity = logisticUnit
-                                        .LogisticUnitItems
-                                        .Sum(logisticUnitItem => logisticUnitItem.Quantity),
+                        TotalQuantity = logisticUnit.LogisticUnitItems.Sum(logisticUnitItem => logisticUnitItem.Quantity),
                         Items = logisticUnit.LogisticUnitItems.OrderBy(logisticUnitItem => logisticUnitItem.LogisticUnitItemId)
                         .Select(logisticUnitItem => new WarehouseOrderLogisticUnitItemDto
                         {
@@ -120,9 +120,7 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseOrders
                 );
             }
 
-            bool orderNumberExists =
-                await this.databaseContext.WarehouseOrders
-                    .AnyAsync(item => item.OrderNumber == orderNumber);
+            bool orderNumberExists = await this.databaseContext.WarehouseOrders.AnyAsync(item => item.OrderNumber == orderNumber);
 
             if (orderNumberExists)
             {
@@ -174,33 +172,30 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseOrders
                 CreatedAt = now,
             };
 
-            await this.databaseContext.WarehouseOrders.AddAsync(
-                warehouseOrder
-            );
+            await this.databaseContext.WarehouseOrders.AddAsync(warehouseOrder);
+
+            await this.databaseContext.SaveChangesAsync();
+
+            //do audytu 
+            await this.auditLogService.AddAsync(user.UserId, "WarehouseOrder", warehouseOrder.WarehouseOrderId, "CREATE_WAREHOUSE_ORDER",
+                $"Utworzono zlecenie magazynowe {warehouseOrder.OrderNumber}. " 
+                + $"Klient ID: {warehouseOrder.CustomerId?.ToString() ?? "brak"}.");
 
             await this.databaseContext.SaveChangesAsync();
 
             return await this.GetByIdAsync(warehouseOrder.WarehouseOrderId);
         }
 
-        public async Task<ShipLogisticUnitResultDto> ShipLogisticUnitAsync(
-            int warehouseOrderId,
-            ShipLogisticUnitDto dto,
-            string identityUserId
-        )
+        public async Task<ShipLogisticUnitResultDto> ShipLogisticUnitAsync(int warehouseOrderId, ShipLogisticUnitDto dto, string identityUserId)
         {
             User user = await this.GetActiveUserAsync(identityUserId);
 
-            using var databaseTransaction =
-                await this.databaseContext.Database.BeginTransactionAsync();
+            using var databaseTransaction = await this.databaseContext.Database.BeginTransactionAsync();
 
             try
             {
                 WarehouseOrder warehouseOrder =
-                    await this.databaseContext.WarehouseOrders
-                        .FirstOrDefaultAsync(item =>
-                            item.WarehouseOrderId == warehouseOrderId
-                        )
+                    await this.databaseContext.WarehouseOrders.FirstOrDefaultAsync(item => item.WarehouseOrderId == warehouseOrderId)
                     ?? throw new NotFoundException(
                         $"Nie znaleziono zlecenia magazynowego o ID {warehouseOrderId}."
                     );
@@ -263,46 +258,31 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseOrders
                     ? null
                     : dto.Notes.Trim();
 
-                List<StockMovement> stockMovements =
-                    logisticUnit.LogisticUnitItems
-                        .Select(logisticUnitItem => new StockMovement
-                        {
-                            ProductionLotId =
-                                logisticUnitItem.ProductionLotId,
+                List<StockMovement> stockMovements = logisticUnit.LogisticUnitItems
+                    .Select(logisticUnitItem => new StockMovement
+                    {
+                        ProductionLotId = logisticUnitItem.ProductionLotId,
+                        WarehouseOrderId = warehouseOrder.WarehouseOrderId,
+                        LogisticUnitId = logisticUnit.LogisticUnitId,
+                        MovementType = STOCK_MOVEMENT_TYPE_SHIPMENT,
+                        Quantity = logisticUnitItem.Quantity,
+                        Notes = notes,
+                        CreatedByUserId = user.UserId,
+                        CreatedAt = now,
+                    }).ToList();
 
-                            WarehouseOrderId =
-                                warehouseOrder.WarehouseOrderId,
+                await this.databaseContext.StockMovements.AddRangeAsync(stockMovements);
 
-                            LogisticUnitId =
-                                logisticUnit.LogisticUnitId,
-
-                            MovementType =
-                                STOCK_MOVEMENT_TYPE_SHIPMENT,
-
-                            Quantity =
-                                logisticUnitItem.Quantity,
-
-                            Notes =
-                                notes,
-
-                            CreatedByUserId =
-                                user.UserId,
-
-                            CreatedAt =
-                                now,
-                        })
-                        .ToList();
-
-                await this.databaseContext.StockMovements.AddRangeAsync(
-                    stockMovements
-                );
+                await this.auditLogService.AddAsync(user.UserId, "LogisticUnit", logisticUnit.LogisticUnitId, "SHIP_LOGISTIC_UNIT",
+                    $"Wydano jednostkę SSCC {logisticUnit.Sscc} " + $"na zlecenie magazynowe {warehouseOrder.OrderNumber}. " + $"Łączna ilość: " 
+                    + $"{logisticUnit.LogisticUnitItems.Sum(item => item.Quantity)}."
+);
 
                 await this.databaseContext.SaveChangesAsync();
 
                 await databaseTransaction.CommitAsync();
 
-                decimal totalQuantity =
-                    logisticUnit.LogisticUnitItems.Sum(item => item.Quantity);
+                decimal totalQuantity = logisticUnit.LogisticUnitItems.Sum(item => item.Quantity);
 
                 return new ShipLogisticUnitResultDto
                 {

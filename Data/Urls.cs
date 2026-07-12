@@ -87,6 +87,10 @@ namespace Data
 
         public const string DASHBOARD_SUMMARY = "dashboard/summary";
 
+        //Audyt 
+
+        public const string AUDIT_LOGS = "audit-logs";
+
 
     }
 }
