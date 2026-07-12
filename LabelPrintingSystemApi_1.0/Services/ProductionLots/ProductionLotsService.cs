@@ -10,10 +10,13 @@ namespace LabelPrintingSystemApi_1._0.Services.ProductionLots
     public class ProductionLotsService : IProductionLotsService
     {
         private readonly DatabaseContext databaseContext;
+        private readonly IAuditLogService auditLogService;
 
-        public ProductionLotsService(DatabaseContext databaseContext)
+        public ProductionLotsService(DatabaseContext databaseContext, 
+            IAuditLogService auditLogService)
         {
             this.databaseContext = databaseContext;
+            this.auditLogService = auditLogService;
         }
 
         public async Task<List<ProductionLotDto>> GetAllByProductionOrderIdAsync(
@@ -131,10 +134,29 @@ namespace LabelPrintingSystemApi_1._0.Services.ProductionLots
                 CreatedByUserId = user.UserId,
                 CreatedAt = DateTime.UtcNow
             };
+            using var databaseTransaction = await databaseContext.Database.BeginTransactionAsync();
+            try
+            {
+                this.databaseContext.ProductionLots.Add(productionLot);
 
-            this.databaseContext.ProductionLots.Add(productionLot);
+                await this.databaseContext.SaveChangesAsync();
+                await auditLogService.AddAsync(user.UserId, "ProductionLot", productionLot.ProductionLotId,
+                    "CREATE_PRODUCTION_LOT", $"Utworzono partię produkcyjną {productionLot.LotNumber}. " +
+                    $"Zlecenie produkcyjne: {productionOrder.OrderNumber}. " + $"Produkt: {productionOrder.Product.ProductCode} - " +
+                    $"{productionOrder.Product.Name}. " + $"Ilość wyprodukowana: {productionLot.ProducedQuantity}. " +
+                    $"Data produkcji: {productionLot.ProductionDate:yyyy-MM-dd}. " + $"Data ważności: " +
+                    $"{(productionLot.ExpirationDate.HasValue ? productionLot.ExpirationDate.Value.ToString("yyyy-MM-dd")
+                    : "brak")}.");
+                await databaseContext.SaveChangesAsync();
 
-            await this.databaseContext.SaveChangesAsync();
+                await databaseTransaction.CommitAsync();
+            }
+            catch {
+                await databaseTransaction.RollbackAsync();
+
+                throw;
+
+            }
 
             return new ProductionLotDto
             {
