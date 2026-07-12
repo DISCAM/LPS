@@ -13,16 +13,20 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
     {
         private const string PRODUCTION_RECEIPT = "PRODUCTION_RECEIPT";
 
+
         private static readonly JsonSerializerOptions labelDataJsonOptions = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
         private readonly DatabaseContext databaseContext;
+        private readonly IAuditLogService auditLogService;
 
-        public WarehouseReceiptsService(DatabaseContext databaseContext)
+        public WarehouseReceiptsService(DatabaseContext databaseContext, IAuditLogService auditLogService)
         {
             this.databaseContext = databaseContext;
+            this.auditLogService = auditLogService;
+
         }
 
         public async Task<WarehouseReceiptResultDto> CreateAsync(
@@ -132,6 +136,8 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
 
                 await this.databaseContext.LogisticUnits.AddAsync(logisticUnit);
 
+
+
                 await this.databaseContext.SaveChangesAsync();
 
                 LogisticUnitItem logisticUnitItem = new()
@@ -233,9 +239,13 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
                     CreatedAt = now,
                 };
 
-                await this.databaseContext.PrintJobHistories.AddAsync(
-                    printJobHistory
-                );
+                await this.databaseContext.PrintJobHistories.AddAsync(printJobHistory);
+
+                await this.auditLogService.AddAsync(user.UserId, "LogisticUnit", logisticUnit.LogisticUnitId, "CREATE_WAREHOUSE_RECEIPT",
+                    $"Przyjęto LOT {productionLot.LotNumber} na magazyn. " + $"Utworzono jednostkę SSCC {logisticUnit.Sscc}. " +
+                    $"Ilość: {dto.Quantity}. " + $"Typ jednostki: {logisticUnit.UnitType}. " 
+                    + $"Utworzono zadanie wydruku ID {printJob.PrintJobId}.");
+
 
                 await this.databaseContext.SaveChangesAsync();
 
