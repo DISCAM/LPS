@@ -10,10 +10,12 @@ namespace LabelPrintingSystemApi_1._0.Services.ProductionOrders
     public class ProductionOrdersService : IProductionOrdersService
     {
         private readonly DatabaseContext databaseContext;
+        private readonly IAuditLogService auditLogService;
 
-        public ProductionOrdersService(DatabaseContext databaseContext)
+        public ProductionOrdersService(DatabaseContext databaseContext, IAuditLogService auditLogService)
         {
             this.databaseContext = databaseContext;
+            this.auditLogService = auditLogService;
         }
 
         public async Task<List<ProductionOrderDto>> GetAllAsync()
@@ -27,17 +29,13 @@ namespace LabelPrintingSystemApi_1._0.Services.ProductionOrders
                 {
                     ProductionOrderId = x.ProductionOrderId,
                     OrderNumber = x.OrderNumber,
-
                     ProductId = x.ProductId,
                     ProductCode = x.Product.ProductCode,
                     ProductName = x.Product.Name,
-
                     PlannedQuantity = x.PlannedQuantity,
                     Status = x.Status,
-
                     PlannedStartDate = x.PlannedStartDate,
                     PlannedEndDate = x.PlannedEndDate,
-
                     CustomerId = x.CustomerId,
                     CustomerName = x.Customer != null
                         ? x.Customer.Name
@@ -45,9 +43,7 @@ namespace LabelPrintingSystemApi_1._0.Services.ProductionOrders
 
                     ProductionOrderType = x.ProductionOrderType,
                     CreatedAt = x.CreatedAt
-                })
-                .ToListAsync();
-
+                }).ToListAsync();
             return productionOrders;
         }
 
@@ -168,9 +164,29 @@ namespace LabelPrintingSystemApi_1._0.Services.ProductionOrders
                 CreatedAt = DateTime.UtcNow
             };
 
-            databaseContext.ProductionOrders.Add(productionOrder);
+            using var databaseTransaction = await this.databaseContext.Database.BeginTransactionAsync();
 
-            await databaseContext.SaveChangesAsync();
+            try{
+
+                databaseContext.ProductionOrders.Add(productionOrder);
+
+                await databaseContext.SaveChangesAsync();
+
+                await auditLogService.AddAsync(user.UserId, "ProductionOrder", productionOrder.ProductionOrderId, "CREATE_PRODUCTION_ORDER",
+                    $"Utworzono zlecenie produkcyjne {productionOrder.OrderNumber}. " + $"Produkt: {product.ProductCode} - {product.Name}. " +
+                    $"Planowana ilość: {productionOrder.PlannedQuantity}. " + $"Typ zlecenia: {productionOrder.ProductionOrderType}. " +
+                    $"Klient: {customer?.Name ?? "produkcja na magazyn"}.");
+
+                await this.databaseContext.SaveChangesAsync();
+
+                await databaseTransaction.CommitAsync();
+            }
+            catch {
+
+                await databaseTransaction.RollbackAsync();
+
+                throw;
+            }
 
             return new ProductionOrderDto
             {
