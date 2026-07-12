@@ -14,6 +14,7 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
         private readonly DatabaseContext databaseContext;
         private readonly IPrintJobDispatcher printJobDispatcher;
         private readonly ILogger<PrintJobService> logger;
+        private readonly IAuditLogService auditLogService;
 
         private static readonly JsonSerializerOptions labelDataJsonOptions = new()
         {
@@ -23,12 +24,14 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
         public PrintJobService(
             DatabaseContext databaseContext,
             ILogger<PrintJobService> logger, 
-            IPrintJobDispatcher printJobDispatcher
+            IPrintJobDispatcher printJobDispatcher,
+            IAuditLogService auditLogService
         )
         {
             this.databaseContext = databaseContext;
             this.logger = logger;
             this.printJobDispatcher = printJobDispatcher;
+            this.auditLogService = auditLogService;
         }
 
         public async Task<List<PrintJobListDto>> GetAllPrintJobsAsync()
@@ -40,29 +43,18 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
                 {
                     PrintJobId = printJob.PrintJobId,
                     LabelId = printJob.LabelId,
-
                     LabelType = printJob.Label.LabelType,
-
                     ProductName = printJob.Label.Product != null
                         ? printJob.Label.Product.Name
                         : null,
-
                     PrimaryCodeValue = printJob.Label.PrimaryCodeValue,
-
                     TemplateName = printJob.Label.LabelTemplate.Name,
-
                     PrinterName = printJob.Printer.Name,
-
                     Copies = printJob.Copies,
-
                     Status = printJob.Status,
-
                     IsReprint = printJob.IsReprint,
-
                     CreatedByUserName = printJob.CreatedByUser.FullName,
-
                     CreatedAt = printJob.CreatedAt,
-
                     ErrorMessage = printJob.ErrorMessage,
                 })
                 .ToListAsync();
@@ -88,51 +80,35 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
                     {
                         PrintJobId = printJob.PrintJobId,
                         LabelId = printJob.LabelId,
-
                         LabelType = printJob.Label.LabelType,
-
                         ProductCode = printJob.Label.Product != null
                             ? printJob.Label.Product.ProductCode
                             : null,
-
                         ProductName = printJob.Label.Product != null
                             ? printJob.Label.Product.Name
                             : null,
-
                         PrimaryCodeValue = printJob.Label.PrimaryCodeValue,
-
                         TemplateName = printJob.Label.LabelTemplate.Name,
-
                         PrinterName = printJob.Printer.Name,
-
                         Copies = printJob.Copies,
-
                         Status = printJob.Status,
-
                         IsReprint = printJob.IsReprint,
-
                         ErrorMessage = printJob.ErrorMessage,
-
                         CreatedByUserName = printJob.CreatedByUser.FullName,
-
                         CreatedAt = printJob.CreatedAt,
-
                         ModifiedByUserName = printJob.ModifiedByUser != null
                             ? printJob.ModifiedByUser.FullName
                             : null,
-
                         ModifiedAt = printJob.ModifiedAt,
-
                         History = printJob.PrintJobHistories
-                            .OrderByDescending(history => history.CreatedAt)
-                            .Select(history => new PrintJobHistoryDto
-                            {
-                                CreatedAt = history.CreatedAt,
-                                Status = history.Status,
-                                ErrorMessage = history.ErrorMessage,
-                                Note = history.Note,
-                            })
-                            .ToList(),
+                        .OrderByDescending(history => history.CreatedAt)
+                        .Select(history => new PrintJobHistoryDto
+                        {
+                            CreatedAt = history.CreatedAt,
+                            Status = history.Status,
+                            ErrorMessage = history.ErrorMessage,
+                            Note = history.Note,
+                        }).ToList(),
                     }
                 })
                 .FirstOrDefaultAsync();
@@ -198,6 +174,11 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
             };
 
             databaseContext.PrintJobHistories.Add(history);
+            await auditLogService.AddAsync(
+                currentUser.UserId,
+                "PrintJob", printJob.PrintJobId, "CANCEL_PRINT_JOB",
+                $"Anulowano zadanie wydruku ID {printJob.PrintJobId}. " +
+                $"Poprzedni status: QUEUED. " + $"Nowy status: CANCELLED." );
 
             await databaseContext.SaveChangesAsync();
 
@@ -258,17 +239,11 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
                 PrintJob reprintPrintJob = new PrintJob
                 {
                     LabelId = sourcePrintJob.LabelId,
-
                     PrinterId = sourcePrintJob.PrinterId,
-
                     CreatedByUserId = currentUser.UserId,
-
                     Copies = sourcePrintJob.Copies,
-
                     Status = "QUEUED",
-
                     IsReprint = true,
-
                     CreatedAt = reprintCreatedAt,
                 };
 
@@ -279,17 +254,23 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
                 PrintJobHistory history = new PrintJobHistory
                 {
                     PrintJobId = reprintPrintJob.PrintJobId,
-
                     Status = "QUEUED",
-
                     CreatedAt = reprintCreatedAt,
-
                     Note =
                         $"Utworzono reprint na podstawie zadania wydruku " +
                         $"o ID {sourcePrintJob.PrintJobId}.",
                 };
 
                 databaseContext.PrintJobHistories.Add(history);
+
+                await auditLogService.AddAsync(currentUser.UserId,
+                    "PrintJob",
+                    reprintPrintJob.PrintJobId,
+                    "REPRINT_PRINT_JOB",
+                    $"Utworzono reprint PrintJob ID {reprintPrintJob.PrintJobId} " +
+                    $"na podstawie zadania ID {sourcePrintJob.PrintJobId}. " +
+                    $"Drukarka: {sourcePrintJob.Printer.Name}. " +
+                    $"Liczba kopii: {reprintPrintJob.Copies}.");
 
                 await databaseContext.SaveChangesAsync();
 
@@ -352,6 +333,13 @@ namespace LabelPrintingSystemApi_1._0.Services.PrintJobs
             // Dispatcher później zmieni status na SENT albo ERROR.
             printJob.ModifiedByUserId = currentUser.UserId;
             printJob.ModifiedAt = DateTime.UtcNow;
+
+            await auditLogService.AddAsync(currentUser.UserId,
+                "PrintJob",
+                printJob.PrintJobId,
+                "EXECUTE_PRINT_JOB",
+                $"Użytkownik uruchomił zadanie wydruku ID {printJob.PrintJobId}. " +
+                $"Status przed wysłaniem: {printJob.Status}.");
 
             await databaseContext.SaveChangesAsync();
             await printJobDispatcher.DispatchPrintJobAsync(printJobId);
