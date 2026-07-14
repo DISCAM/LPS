@@ -70,6 +70,7 @@ namespace Data
         public const string PRODUCTION_ORDERS = "production-orders";
         public const string PRODUCTION_ORDERS_ID = "production-orders/{id}";
         public const string PRODUCTION_ORDER_LOTS = "production-orders/{productionOrderId}/production-lots";
+        public const string PRODUCTION_LOTS = "production-lots";
 
         // operacje produkcyjno magazynowe / przesuniecia na produkcje etykiety sscc 
 

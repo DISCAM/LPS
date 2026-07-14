@@ -101,8 +101,7 @@ namespace LabelPrintingSystemApi_1._0.Services.WarehouseReceipts
                 .Where(item =>
                     item.ProductionLotId == productionLot.ProductionLotId &&
                     item.MovementType == PRODUCTION_RECEIPT
-                )
-                .SumAsync(item => (decimal?)item.Quantity) ?? 0m;
+                ).SumAsync(item => (decimal?)item.Quantity) ?? 0m;
 
             decimal availableQuantity =
                 productionLot.ProducedQuantity - alreadyReceivedQuantity;

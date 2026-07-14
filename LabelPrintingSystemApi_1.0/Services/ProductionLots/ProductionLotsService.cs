@@ -19,6 +19,32 @@ namespace LabelPrintingSystemApi_1._0.Services.ProductionLots
             this.auditLogService = auditLogService;
         }
 
+        public async Task<List<ProductionLotDto>> GetAllAsync()
+        {
+            return await this.databaseContext.ProductionLots
+                .AsNoTracking()
+                .Include(item => item.ProductionOrder)
+                    .ThenInclude(item => item.Product)
+                .OrderByDescending(item => item.CreatedAt)
+                .Select(item => new ProductionLotDto
+                {
+                    ProductionLotId = item.ProductionLotId,
+                    ProductionOrderId = item.ProductionOrderId,
+                    ProductionOrderNumber = item.ProductionOrder.OrderNumber,
+                    ProductId = item.ProductionOrder.ProductId,
+                    ProductCode = item.ProductionOrder.Product.ProductCode,
+                    ProductName = item.ProductionOrder.Product.Name,
+                    LotNumber = item.LotNumber,
+                    ProductionDate = item.ProductionDate,
+                    ExpirationDate = item.ExpirationDate,
+                    ProductionLine = item.ProductionLine,
+                    ShiftCode = item.ShiftCode,
+                    ProducedQuantity = item.ProducedQuantity,
+                    Status = item.Status
+                }).ToListAsync();
+        }
+
+
         public async Task<List<ProductionLotDto>> GetAllByProductionOrderIdAsync(
             int productionOrderId)
         {

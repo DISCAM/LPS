@@ -18,6 +18,16 @@ namespace LabelPrintingSystemApi_1._0.Controllers.ProductionLots
             this.productionLotsService = productionLotsService;
         }
 
+
+        [HttpGet]
+        [Route(Urls.PRODUCTION_LOTS)]
+        public async Task<ActionResult<List<ProductionLotDto>>> GetAll()
+        {
+            List<ProductionLotDto> productionLots = await this.productionLotsService.GetAllAsync();
+
+            return this.Ok(productionLots);
+        }
+
         [HttpGet]
         [Route(Urls.PRODUCTION_ORDER_LOTS)]
         public async Task<ActionResult<List<ProductionLotDto>>> GetAllByProductionOrderId([FromRoute] int productionOrderId)
