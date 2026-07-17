@@ -19,8 +19,8 @@ namespace LabelPrintingSystemApi_1._0.Services.StockMovements
             return await this.databaseContext.StockMovements
                 .AsNoTracking()
                 .Include(item => item.ProductionLot)
-                    .ThenInclude(item => item.ProductionOrder)
-                        .ThenInclude(item => item.Product)
+                .ThenInclude(item => item.ProductionOrder)
+                .ThenInclude(item => item.Product)
                 .Include(item => item.LogisticUnit)
                 .Include(item => item.WarehouseOrder)
                 .Include(item => item.CreatedByUser)
@@ -57,8 +57,7 @@ namespace LabelPrintingSystemApi_1._0.Services.StockMovements
 
                     CreatedByUserId = item.CreatedByUserId,
                     CreatedByUserName = item.CreatedByUser.FullName,
-                })
-                .ToListAsync();
+                }).ToListAsync();
         }
     }
 }
